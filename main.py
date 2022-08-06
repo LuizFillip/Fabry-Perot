@@ -16,10 +16,6 @@ def get_endswith_extension(infile,
     
     return txt_files
 
-infile = "Database/Cariri/2013/Abril/"
-
-filename = get_endswith_extension(infile)[0]
-
 
 
 
@@ -33,7 +29,7 @@ def get_date_from_filename(filename: str) -> datetime.datetime:
                          day = int(s[6:8]))
 
 
-date = filename_to_date(filename)
+
 
 class FabryPerot(object):
     
@@ -117,10 +113,47 @@ class FabryPerot(object):
     @property    
     def temp(self):
         
-        return self.df.loc[:, ["tn", "dtn", "dir", "time"]]
+        return self.df.loc[:, ["tn", "dtn", "dir"]]
     
     @property
+    def wind(self):
+        return self.df.loc[:, ["vn"]]
 
-print(FabryPerot(infile, filename).temp)
+infile = "Database/Cariri/2013/Abril/"
+
+filename = get_endswith_extension(infile)[0]
+
+date = get_date_from_filename(filename)
+
+df = FabryPerot(infile, filename).temp
 
 
+
+
+def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
+    
+    df = df.resample('1min').last().interpolate()
+
+    date = df.index.date[0]
+
+    hour = df.index.hour.values
+    minute = df.index.minute.values / 60
+    second = df.index.second.values / 3600
+    
+    hour = np.where(hour >= 9, hour, hour + 24)
+
+    df["time"] = np.array(hour + second + minute)
+    
+    df["time"] = df["time"].apply(lambda x: np.round(x, 2))    
+
+    return df.resample('10min').asfreq()
+
+ee = df.loc[df.dir == "east", :]
+
+ee1 = datetime_to_float(ee)
+
+
+ee["tn"].plot()
+
+ee1["tn"].plot()
+print(ee1)
