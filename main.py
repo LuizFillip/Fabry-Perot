@@ -17,6 +17,21 @@ def get_endswith_extension(infile,
     return txt_files
 
 
+def monthToNum(shortMonth):
+    return {
+        'jan': 1,
+        'fev': 2,
+        'mar': 3,
+        'abr': 4,
+        'mai': 5,
+        'jun': 6,
+        'jul': 7,
+        'ago': 8,
+        'set': 9, 
+        'out': 10,
+        'nov': 11,
+        'dez': 12
+        }[shortMonth]
 
 
 def get_date_from_filename(filename: str) -> datetime.datetime:
@@ -106,26 +121,35 @@ class FabryPerot(object):
                       'wavlen', 'rlel', 'drlel', 'doppl_ref']
         
         
-        self.df = df.drop(names + other_cols, axis=1) 
+        df = df.drop(names + other_cols, axis=1) 
         
+        # Compute horizontal wind
         
-    
+        df.loc[(df['dir'] == 'Leste') | 
+               (df['dir'] == 'Oeste'), 
+               'vnu'] = (df['vnu'] / (np.cos(np.deg2rad(df['elm']))*
+                                      np.sin(np.deg2rad(df['azm']))))
+
+        df.loc[(df['dir'] == 'north') | 
+               (df['dir'] == 'south'), 
+               'vnu'] = (df['vnu'] / (np.cos(np.deg2rad(df['elm']))*
+                                      np.cos(np.deg2rad(df['azm']))))
+   
+        
+        print(df.columns)
+        self.df = df
+                                                 
     @property    
     def temp(self):
         
-        return self.df.loc[:, ["tn", "dtn", "dir"]]
+        return self.df.loc[:, ["tn", "dtn", 
+                               "dir", "time"]]
     
     @property
     def wind(self):
-        return self.df.loc[:, ["vn"]]
+        return self.df.loc[:, ["vnu", "dvnu", 
+                               "dir", "time"]]
 
-infile = "Database/Cariri/2013/Abril/"
-
-filename = get_endswith_extension(infile)[0]
-
-date = get_date_from_filename(filename)
-
-df = FabryPerot(infile, filename).temp
 
 
 
@@ -134,7 +158,7 @@ def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
     
     df = df.resample('1min').last().interpolate()
 
-    date = df.index.date[0]
+    #date = df.index.date[0]
 
     hour = df.index.hour.values
     minute = df.index.minute.values / 60
@@ -148,12 +172,24 @@ def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
 
     return df.resample('10min').asfreq()
 
-ee = df.loc[df.dir == "east", :]
 
-ee1 = datetime_to_float(ee)
+def main():
 
-
-ee["tn"].plot()
-
-ee1["tn"].plot()
-print(ee1)
+    infile = "Database/Cariri/2013/Abril/"
+    
+    filename = get_endswith_extension(infile)[0]
+    
+    date = get_date_from_filename(filename)
+    
+    df = FabryPerot(infile, filename).temp
+    
+    
+    ee = df.loc[df.dir == "west", :]
+    
+    ee1 = datetime_to_float(ee)
+    
+    
+    ee["tn"].plot()
+    
+    ee1["tn"].plot()
+  
