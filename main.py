@@ -1,57 +1,14 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import pandas as pd
-import datetime
-import os 
-
-
-
-def get_endswith_extension(infile, 
-                           extention = ".txt"):
-    _, _, files = next(os.walk(infile))
-    txt_files = []
-    for filename in files:
-        if filename.endswith(extention):
-            txt_files.append(filename)
-    
-    return txt_files
-
-
-def monthToNum(shortMonth):
-    return {
-        'jan': 1,
-        'fev': 2,
-        'mar': 3,
-        'abr': 4,
-        'mai': 5,
-        'jun': 6,
-        'jul': 7,
-        'ago': 8,
-        'set': 9, 
-        'out': 10,
-        'nov': 11,
-        'dez': 12
-        }[shortMonth]
-
-
-def get_date_from_filename(filename: str) -> datetime.datetime:
-    
-    """Convert FPI filename (with date and site) into date format.""" 
-    s = filename.split('_')[2].split('.')[0]
- 
-    return datetime.date(year = int(s[0:4]), 
-                         month = int(s[4:6]),
-                         day = int(s[6:8]))
-
-
 
 
 class FabryPerot(object):
     
-    def __init__(self, infile, filename):
+    def __init__(self, infile):
         
     
-        df = pd.read_csv(infile + filename, 
+        df = pd.read_csv(infile, 
                          delim_whitespace = True)
         
         hours = df.HOUR.values
@@ -71,11 +28,11 @@ class FabryPerot(object):
                 (df['AZM'] == -179.7) & (df['ELM'] == 45), #Sul
                 (df['AZM'] == 90.0) & (df['ELM'] == 45), #Leste
                 (df['AZM'] == 89.8) & (df['ELM'] == 45), #Leste
-                (df['AZM'] == -90) & (df['ELM'] == 45), #Oeste
+                (df['AZM'] == -90.0) & (df['ELM'] == 45), #Oeste
                 (df['AZM'] == 0) & (df['ELM'] == 90),  #Zenite
                 (df['AZM'] == -179.8) & (df['ELM'] == 90), #Zenite
                 (df['AZM'] == 0.3) & (df['ELM'] == 89.8), #Zenite
-                (df['AZM'] == 180.0) & (df['ELM'] == 90), #Zenite
+                (df['AZM'] == 180.0) & (df['ELM'] == 90.0), #Zenite
                 (df['AZM'] == 0) & (df['ELM'] == 89.5), #Zenite
                 (df['AZM'] == 180.0) & (df['ELM'] == 71.3), #Zenite
                 (df['AZM'] == -30.9) & (df['ELM'] == 55.6), #VC Norte Car
@@ -90,19 +47,21 @@ class FabryPerot(object):
                 (df['AZM'] == -78.8) & (df['ELM'] == 64.2) #VC centro Car
                 ] 
 
-        choices = ['north', 'north', 'north', 
+        names = ['north', 'north', 'north', 
                'south', 'south', 'south', 
-               'east', 'east', 'east',
+               'east', 'east', 'west',
                'zenith','zenith', 'zenith', 
                'zenith', 'zenith', 'zenith',
                'CVNB', 'CVNB', 'CVNA', 'CVSA', 
-               'CVSB', 'CVSB', 'INA', 'INA', 'INB', 'INB']
+               'CVSB', 'CVSB', 'INA', 
+               'INA', 'INB', 'INB']
     
-        df['dir'] = np.select(conditions, choices, default = np.nan)
+        df['dir'] = np.select(conditions, names, default = np.nan)
         
         names = ['year', 'month', 'day', 
                  'hour', 'minute', 'second']
         
+        df = df.loc[~(df["WIND_ERR"] == 2)]
         
         for num, elem in enumerate(df.columns):
             if num < 6:
@@ -122,21 +81,17 @@ class FabryPerot(object):
         
         
         df = df.drop(names + other_cols, axis=1) 
-        
-        # Compute horizontal wind
-        
-        df.loc[(df['dir'] == 'Leste') | 
-               (df['dir'] == 'Oeste'), 
-               'vnu'] = (df['vnu'] / (np.cos(np.deg2rad(df['elm']))*
-                                      np.sin(np.deg2rad(df['azm']))))
+                
+        df.loc[(df['dir'] == 'east') | 
+               (df['dir'] == 'west'), 
+               'vnu'] = (df['vnu'] / (np.cos(np.radians(df['elm']))*
+                                      np.sin(np.radians(df['azm']))))
 
         df.loc[(df['dir'] == 'north') | 
                (df['dir'] == 'south'), 
-               'vnu'] = (df['vnu'] / (np.cos(np.deg2rad(df['elm']))*
-                                      np.cos(np.deg2rad(df['azm']))))
+               'vnu'] = (df['vnu'] / (np.cos(np.radians(df['elm']))*
+                                      np.cos(np.radians(df['azm']))))
    
-        
-        print(df.columns)
         self.df = df
                                                  
     @property    
@@ -175,21 +130,14 @@ def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
 
-    infile = "Database/Cariri/2013/Abril/"
-    
-    filename = get_endswith_extension(infile)[0]
-    
-    date = get_date_from_filename(filename)
-    
-    df = FabryPerot(infile, filename).temp
+    infile = "database/minime01_car_20140101.cedar.007.txt"
     
     
-    ee = df.loc[df.dir == "west", :]
+    df = FabryPerot(infile).wind
     
-    ee1 = datetime_to_float(ee)
-    
-    
-    ee["tn"].plot()
-    
-    ee1["tn"].plot()
+    df.loc[df["dir"] == "west", "vnu"].plot()
+    df.loc[df["dir"] == "east", "vnu"].plot()
+
+main()
+
   
