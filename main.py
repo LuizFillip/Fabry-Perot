@@ -1,7 +1,7 @@
 import numpy as np 
-import matplotlib.pyplot as plt
 import pandas as pd
-
+from datetime import timedelta
+import matplotlib.pyplot as plt
 
 class FabryPerot(object):
     
@@ -128,6 +128,32 @@ def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
     return df.resample('10min').asfreq()
 
 
+def resample_interpolate(dat, sample = '5min'):
+    start = dat.index[0].date()
+    end = start + timedelta(days = 1)  
+    
+    new_index = pd.date_range(f"{start} 21:00", 
+                              f"{end} 08:00", freq = sample)
+    chuck = pd.DataFrame(index = new_index)
+    
+    chuck = pd.concat([dat, chuck], axis = 1).interpolate()
+    
+    return chuck.resample(sample).asfreq()
+
+
+def get_mean(df):
+
+    out = []
+    
+    for coord in ["west", "east"]:
+        dat = df.loc[(df["dir"] == coord) , "vnu"]
+        out.append(resample_interpolate(dat))
+     
+    ds = pd.concat(out, axis = 1)
+    return ds.mean(axis = 1).resample("10min").asfreq()
+
+
+
 def main():
 
     infile = "database/minime01_car_20140101.cedar.007.txt"
@@ -135,9 +161,8 @@ def main():
     
     df = FabryPerot(infile).wind
     
-    df.loc[df["dir"] == "west", "vnu"].plot()
-    df.loc[df["dir"] == "east", "vnu"].plot()
-
+    
+   
+   
 main()
-
   
