@@ -41,7 +41,6 @@ def plotCoord(ax, df, fp, zonal = False):
         
         ax.plot(df_[coord], label = f"HMW14 ({site})", lw = 2)
         
-        
     mn = get_mean(fp, zonal = zonal, sample = "10min")
     
     ax.plot(mn, label = "FPI (car)", color = "k", lw = 2)
