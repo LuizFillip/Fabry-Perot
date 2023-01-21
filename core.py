@@ -73,14 +73,14 @@ class FabryPerot(object):
         
         
         df.index = pd.to_datetime(df[names], 
-                                  infer_datetime_format=True)
+                                  infer_datetime_format = True)
         
         other_cols = ['recno', 'kindat', 'kinst', 'gdalt', 
                       'dgdalt', 'ut1_unix', 'ut2_unix', 
                       'wavlen', 'rlel', 'drlel', 'doppl_ref']
         
         
-        df = df.drop(names + other_cols, axis=1) 
+        df = df.drop(names + other_cols, axis = 1) 
                 
         df.loc[(df['dir'] == 'east') | 
                (df['dir'] == 'west'), 
@@ -102,30 +102,9 @@ class FabryPerot(object):
     
     @property
     def wind(self):
+        
         return self.df.loc[:, ["vnu", "dvnu", 
                                "dir", "time"]]
-
-
-
-
-
-def datetime_to_float(df: pd.DataFrame) -> pd.DataFrame:
-    
-    df = df.resample('1min').last().interpolate()
-
-    #date = df.index.date[0]
-
-    hour = df.index.hour.values
-    minute = df.index.minute.values / 60
-    second = df.index.second.values / 3600
-    
-    hour = np.where(hour >= 9, hour, hour + 24)
-
-    df["time"] = np.array(hour + second + minute)
-    
-    df["time"] = df["time"].apply(lambda x: np.round(x, 2))    
-
-    return df.resample('10min').asfreq()
 
 
 def resample_interpolate(dat, sample = '5min'):
@@ -133,7 +112,8 @@ def resample_interpolate(dat, sample = '5min'):
     end = start + timedelta(days = 1)  
     
     new_index = pd.date_range(f"{start} 21:00", 
-                              f"{end} 08:00", freq = sample)
+                              f"{end} 08:00", 
+                              freq = sample)
     chuck = pd.DataFrame(index = new_index)
     
     chuck = pd.concat([dat, chuck], axis = 1).interpolate()
@@ -141,28 +121,22 @@ def resample_interpolate(dat, sample = '5min'):
     return chuck.resample(sample).asfreq()
 
 
-def get_mean(df):
+def get_mean(df, zonal = True, sample = "10min"):
 
     out = []
     
-    for coord in ["west", "east"]:
-        dat = df.loc[(df["dir"] == coord) , "vnu"]
+    if zonal:
+        coords =  ["west", "east"]
+    else:
+        coords =  ["north", "south"]
+    
+    for coord in coords:
+        dat = df.loc[(df["dir"] == coord), "vnu"]
         out.append(resample_interpolate(dat))
      
     ds = pd.concat(out, axis = 1)
-    return ds.mean(axis = 1).resample("10min").asfreq()
+    return ds.mean(axis = 1).resample(sample).asfreq()
 
 
 
-def main():
-
-    infile = "database/minime01_car_20140101.cedar.007.txt"
-    
-    
-    df = FabryPerot(infile).wind
-    
-    
-   
-   
-main()
   
