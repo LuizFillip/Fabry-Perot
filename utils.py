@@ -1,5 +1,5 @@
 import os
-import datetime 
+import datetime as dt
 
 
 def get_endswith_extension(infile, 
@@ -30,11 +30,18 @@ def monthToNum(shortMonth):
         }[shortMonth]
 
 
-def get_date_from_filename(filename: str) -> datetime.datetime:
+class file_attrs(object):
     
-    """Convert FPI filename (with date and site) into date format.""" 
-    s = filename.split('_')[2].split('.')[0]
- 
-    return datetime.date(year = int(s[0:4]), 
-                         month = int(s[4:6]),
-                         day = int(s[6:8]))
+    def __init__(self, filename):
+        
+        s = filename.split('_')
+        obs_list = s[-1].split('.')
+        
+        self.intr = s[0]
+        self.site = s[1]
+        self.number = obs_list[1]
+        
+        date_str = obs_list[0]
+        self.date = dt.datetime.strptime(date_str, "%Y%m%d")
+    
+   
