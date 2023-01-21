@@ -8,25 +8,7 @@ import matplotlib.dates as dates
 s.config_labels()
 
 
-infile = "database/HWM/20140101.txt"
 
-df = pd.read_csv(infile, index_col = "time")
-
-df.index = pd.to_datetime(df.index)
-
-
-
-infile = "database/minime01_car_20140101.cedar.007.txt"
-
-fp = FabryPerot(infile).wind
-
-
-fig, ax = plt.subplots(figsize = (10, 6), 
-                       sharex = True, 
-                       nrows = 2)
-
-
-plt.subplots_adjust(hspace = 0.1)
 
 def plotCoord(ax, df, fp, zonal = False):
     
@@ -49,7 +31,25 @@ def plotCoord(ax, df, fp, zonal = False):
     ax.xaxis.set_major_locator(dates.HourLocator(interval = 1))
    
     return fig, ax
+infile = "database/HWM/20140101.txt"
 
+df = pd.read_csv(infile, index_col = "time")
+
+df.index = pd.to_datetime(df.index)
+
+
+
+infile = "database/minime01_car_20140101.cedar.007.txt"
+
+fp = FabryPerot(infile).wind
+
+
+fig, ax = plt.subplots(figsize = (10, 6), 
+                       sharex = True, 
+                       nrows = 2)
+
+
+plt.subplots_adjust(hspace = 0.1)
 plotCoord(ax[0], df, fp, zonal = True)
 plotCoord(ax[1], df, fp, zonal = False)
 
