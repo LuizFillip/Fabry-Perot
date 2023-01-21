@@ -1,6 +1,6 @@
 import os
 import datetime as dt
-
+import numpy as np
 
 def get_endswith_extension(infile, 
                            extention = ".txt"):
@@ -11,6 +11,13 @@ def get_endswith_extension(infile,
             txt_files.append(filename)
     
     return txt_files
+
+def datetime_to_float(res):
+    
+    hour = res.index.hour + res.index.minute / 60
+ 
+    return np.where(hour >= 9, hour, hour + 24)
+
 
 
 def monthToNum(shortMonth):
