@@ -1,38 +1,24 @@
 import pandas as pd
-from utils import datetime_to_float
 import matplotlib.pyplot as plt
 import numpy as np
 import setup as s
 import matplotlib.dates as dates
-
-
-infile = "database/HWM/cariri_winds_2013.txt"
-
-def load_model(infile):
-
-    df = pd.read_csv(infile, index_col= "time")
-    df.index = pd.to_datetime(df.index)
-    
-    del df["Unnamed: 0"]
-    
-    df["time2"] = datetime_to_float(df)
-    df["day"] = df.index.date
-
-    return df.loc[(df.index.hour >= 21) |
-                 (df.index.hour <= 8)]
+from core import load
 
 def plot(
         ax, 
         res, 
         coord = "zon", 
         year = 2013, 
-        interpol = True
+        Type = "observado"
         ):
     
     if coord == "zon": 
         label = "zonal"
+        vmin, vmax, step = -100, 200, 50
     else:
         label = "meridional"
+        vmin, vmax, step = -100, 100, 50
     
     year = res.index[0].year
 
@@ -40,19 +26,21 @@ def plot(
                         values = coord, 
                         columns = "day", 
                         index = "time2")
-    if interpol:    
-        df = df.interpolate()
+    
+    df = df.interpolate()
 
     X, Y = np.meshgrid(df.columns, df.index)
     Z = df.values
     img = ax.pcolormesh(X, Y, Z, 
-                        vmax = 300, 
-                        vmin = -150, 
+                        vmax = vmax, 
+                        vmin = vmin, 
                         cmap = "jet") 
     
     s.colorbar_setting(
         img, ax, 
-        ticks = np.arange(-200, 250, 50), 
+        ticks = np.arange(vmin, 
+                          vmax + step, 
+                          step), 
         label = "Velocidade (m/s)"
         )
     
@@ -62,17 +50,30 @@ def plot(
         xlabel = "Meses"
            )
     
+    ax.text(0.01, 0.9, f"Vento {Type}", 
+            transform = ax.transAxes) 
+    
     ax.xaxis.set_major_formatter(dates.DateFormatter('%b'))
     ax.xaxis.set_major_locator(dates.MonthLocator(interval = 1))
     
     return ax
 
-fig, ax = plt.subplots(figsize = (10, 6))
 
-df = load_model(infile) 
+def main():
 
-print(df.describe())
-
-ax1 = plot(ax, df, coord = "zon", year = 2013, 
-        interpol = False
-        )
+    fig, ax = plt.subplots(figsize = (8, 6), 
+                           nrows = 2, 
+                           sharey = True,
+                           sharex = True)
+    
+    plt.subplots_adjust(hspace = 0.1)
+    
+    modeled = "database/HWM/cariri_winds_2013.txt"
+    observed = "database/processed_2013.txt"
+    
+    ax1 = plot(ax[0], load(modeled), coord = "zon", 
+               Type = "modelado")
+    ax1.set(xlabel = "")
+    ax2 = plot(ax[1], load(observed), coord = "zon")
+    
+    ax2.set(title = "")
