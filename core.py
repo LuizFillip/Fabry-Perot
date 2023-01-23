@@ -1,7 +1,8 @@
 import numpy as np 
 import pandas as pd
 from datetime import timedelta
-import matplotlib.pyplot as plt
+from utils import datetime_to_float
+
 
 class FabryPerot(object):
     
@@ -61,7 +62,7 @@ class FabryPerot(object):
         names = ['year', 'month', 'day', 
                  'hour', 'minute', 'second']
         
-        df = df.loc[~(df["WIND_ERR"] == 2)]
+      
         
         for num, elem in enumerate(df.columns):
             if num < 6:
@@ -91,8 +92,10 @@ class FabryPerot(object):
                (df['dir'] == 'south'), 
                'vnu'] = (df['vnu'] / (np.cos(np.radians(df['elm']))*
                                       np.cos(np.radians(df['azm']))))
-   
+                                     
         self.df = df
+        
+    
                                                  
     @property    
     def temp(self):
@@ -103,7 +106,10 @@ class FabryPerot(object):
     @property
     def wind(self):
         
-        return self.df.loc[:, ["vnu", "dvnu", 
+        cond  = ((self.df["VNU"] < 200) & 
+                 (self.df["VNU"] > -100) )
+        
+        return self.df.loc[cond, ["vnu", "dvnu", 
                                "dir", "time"]]
 
 
@@ -137,6 +143,38 @@ def get_mean(df, zonal = True, sample = "10min"):
     ds = pd.concat(out, axis = 1)
     return ds.mean(axis = 1).resample(sample).asfreq()
 
+def load(infile, resample = False):
+    """Load processed data (FPI pipeline) and 
+    HWM-14 model results"""
+    
+    df = pd.read_csv(infile, index_col = "time")
+    df.index = pd.to_datetime(df.index)
+
+    try:
+        del df["Unnamed: 0"]
+    except:
+        pass
+    
+    if resample:
+        df = df.resample("1H").mean()
+    
+    df["time2"] = datetime_to_float(df)
+    df["day"] = df.index.date
 
 
-  
+    return df.loc[(df.index.hour >= 20) |
+                 (df.index.hour <= 8)]
+
+
+
+def main():
+
+    infile = "database/2013/minime01_car_20130420.cedar.002.txt"
+    
+    observed = "database/processed_2013.txt"
+    
+    df = load(observed)
+    
+    print(df.resample("1H").mean())
+    
+#main()
