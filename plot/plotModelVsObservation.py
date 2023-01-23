@@ -15,26 +15,32 @@ def plot(
     
     if coord == "zon": 
         label = "zonal"
-        vmin, vmax, step = -100, 200, 50
+        vmin, vmax, step = -100, 150, 50
     else:
         label = "meridional"
         vmin, vmax, step = -100, 100, 50
     
     year = res.index[0].year
-
+    
     df = pd.pivot_table(res, 
                         values = coord, 
                         columns = "day", 
                         index = "time2")
     
     df = df.interpolate()
+    
+    
+    
 
     X, Y = np.meshgrid(df.columns, df.index)
     Z = df.values
-    img = ax.pcolormesh(X, Y, Z, 
-                        vmax = vmax, 
-                        vmin = vmin, 
-                        cmap = "jet") 
+    
+    img = ax.pcolormesh(X, Y, Z,  vmax = vmax, 
+                      vmin = vmin, 
+                      cmap = "jet") 
+   
+    
+    #img = ax.contourf(X, Y, Z, 50,  cmap = "jet") 
     
     s.colorbar_setting(
         img, ax, 
@@ -47,7 +53,8 @@ def plot(
     ax.set(
         title = f"Vento {label} para {year}",
         ylabel = "Hora (UT)", 
-        xlabel = "Meses"
+        xlabel = "Meses", 
+        yticks = np.arange(20, 34, 2)
            )
     
     ax.text(0.01, 0.9, f"Vento {Type}", 
@@ -65,15 +72,41 @@ def main():
                            nrows = 2, 
                            sharey = True,
                            sharex = True)
-    
+    s.config_labels()
     plt.subplots_adjust(hspace = 0.1)
     
     modeled = "database/HWM/cariri_winds_2013.txt"
     observed = "database/processed_2013.txt"
     
-    ax1 = plot(ax[0], load(modeled), coord = "zon", 
+    coord = "zon"
+    
+    df = load(modeled)
+    
+    print(df.describe())
+    ax1 = plot(ax[0], df, 
+               coord = coord, 
                Type = "modelado")
+    
+    df = load(observed)
+
+    df = df.loc[(df["zon"] > -100) &
+                (df["zon"] < 170) & 
+                (df["mer"] > -100)
+                ]
+    
+    print(df.describe())
+    
     ax1.set(xlabel = "")
-    ax2 = plot(ax[1], load(observed), coord = "zon")
+    ax2 = plot(ax[1], df,  
+               coord = coord)
     
     ax2.set(title = "")
+    
+main()
+
+observed = "database/processed_2013.txt"
+
+#df = load(observed)
+ 
+#(df.loc[]) 
+ 

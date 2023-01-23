@@ -1,59 +1,62 @@
-import pyIGRF
-import numpy as np
+import setup as s
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
+from wind_equations import CarrascoEquation, run_igrf
+from utils import datetime_to_float
+pd.options.mode.chained_assignment = None 
 
-
-def CarrascoEquation(zon, mer, d, i):
-    D = np.radians(d)
-    I = np.radians(i)
-    return (zon * np.cos(D) + mer * np.sin(D)) * np.sin(I)
-
-def FagundesEquation(zon, mer, d, i):
-    D = np.radians(d)
-    I = np.radians(i)
-    return (mer * np.cos(D) - zon * np.sin(D)) * np.sin(I)
-
-coords = {"car": (-7.38, -36.528), 
-          "for": (-3.73, -38.522)}
-
-
-site = "car"
-
-lat, lon = coords[site]
-
-lon += 360
-
-alt = 250
-year = 2014
-
-d, i, h, x, y, z, f = pyIGRF.igrf_value(lat, lon, 
-                                        alt = alt, 
-                                        year = year)
-
-infile = "database/HWM/20140101.txt"
+infile = "database/HWM/cariri_winds_2013.txt"
 
 df = pd.read_csv(infile, index_col = "time")
 
 df.index = pd.to_datetime(df.index)
 
-df = df.loc[df.site == site, ["mer", "zon"]]
+#df = df.resample("1H").mean()
 
-cars = CarrascoEquation(df.zon, df.mer, d, i)
-fags = FagundesEquation(df.zon, df.mer, d, i)
+d, i = run_igrf(year = 2013)
 
+u = CarrascoEquation(df.zon, df.mer, d, i).to_frame()
+
+def pivot_format(df, values = 0):
+    df = df.loc[(df.index.hour >= 20) |
+                 (df.index.hour <= 8)]
+    
+    df["time2"] = datetime_to_float(df)
+    df["day"] = df.index.date
+
+    return pd.pivot_table(df,
+                          values = values, 
+                          index = "time2", 
+                          columns = "day")
+
+
+u2 = pivot_format(u)
 
 fig, ax = plt.subplots(figsize = (10, 4))
 
+img = ax.contourf(u2.columns,
+            u2.index, 
+            u2.values, 60, cmap = "jet")
 
-ax.plot(cars, lw = 2, label = "$(U_\\theta \cos D + U_\phi \sin D ) \sin I$")
-ax.plot(fags, lw = 2, label = "$(U_\phi \cos D - U_\\theta \sin D) \sin I$")
 
-ax.set(ylabel = "Vento efetivo (m/s)", 
-       xlabel = "Hora universal")
+label = "$(U_\\theta \cos D + U_\phi \sin D ) \sin I$"
 
-ax.xaxis.set_major_formatter(dates.DateFormatter('%H:%M'))
-ax.xaxis.set_major_locator(dates.HourLocator(interval = 1))
+ax.set(title = label, 
+       xlabel = "Meses", 
+       ylabel = "Hora universal")
 
-ax.legend()
+vmin, vmax, step = -40, 20, 10
+s.colorbar_setting(
+    img, ax, 
+    ticks = np.arange(vmin, 
+                      vmax + step, 
+                      step), 
+    label = "Velocidade (m/s)"
+    )
+
+ax.xaxis.set_major_formatter(dates.DateFormatter('%b'))
+ax.xaxis.set_major_locator(dates.MonthLocator(interval = 1))
+#ax.legend()
+ 
