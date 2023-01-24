@@ -6,43 +6,60 @@ import matplotlib.dates as dates
 from core import load
 
 
-modeled = "database/HWM/cariri_winds_2013.txt"
-observed = "database/processed_2013.txt"
-
-coord = "zon"
-
-df = load(observed)
-
-df = df.loc[(df.index.hour >= 20) |
-             (df.index.hour <= 8)]
 
 
-df = df.loc[(df["mer"] > -100) &
-            (df["zon"] > -10)]
-
-df = df.resample("3H").mean()
-
-
-hours = list(np.unique(df.index.hour))
-df = df.loc[df.index.hour == 21]
-
-fig, ax = plt.subplots(figsize = (8, 6), 
-                       nrows = 2, 
-                       sharex = True)
-
-plt.subplots_adjust(hspace = 0.1)
-
-coords = ["zon", "mer"]
-texts = ["(a)", "(b)"]
-names = ["Zonal","Meridional"]
-
-
-for num, ax in enumerate(ax.flat):
-    ax.bar(df.index, df[coords[num]], color = "k")
-    ax.set(ylabel = f"{names[num]} (m/s)")
-    ax.text(0.01, 0.85, texts[num], 
-            transform = ax.transAxes)
+def filter_resample(infile):
     
+    df = load(infile)
     
-ax.xaxis.set_major_formatter(dates.DateFormatter('%b'))
-ax.xaxis.set_major_locator(dates.MonthLocator(interval = 2))
+    df = df.loc[(df.index.hour >= 20) |
+                 (df.index.hour <= 8)]
+
+
+    df = df.loc[(df["mer"] > -100) &
+                (df["zon"] > -10)]
+
+    df = df.resample("3H").mean() 
+
+    return df.loc[df.index.hour == 21]
+
+def main():
+
+    modeled = "database/HWM/cariri_winds_2013.txt"
+    observed = "database/processed_2013.txt"
+    
+
+    df1 = filter_resample(modeled)
+    
+    df = filter_resample(observed)
+    
+    fig, ax = plt.subplots(figsize = (14, 6), 
+                           nrows = 2, 
+                           ncols = 2,
+                           sharex = True, 
+                           sharey =  'col')
+    
+    plt.subplots_adjust(hspace = 0.1, wspace = 0.1)
+    
+    coord = ["zon", "mer"]
+    texts = ["(a)", "(b)"]
+    names = ["Zonal","Meridional"]
+    
+    for num in range(2):
+        ax[0, num].bar(df.index, df[coord[num]],
+                       color = "k", label = "FPI (Cariri)")
+        ax[1, num].bar(df1.index, df1[coord[num]], 
+                       color = "k", label = "HWM-14")
+        
+        ax[1, num].legend(loc = "upper right")
+        ax[0, num].legend(loc = "upper right")
+        
+    ax[0,0].set(ylim = [-10, 160], 
+                title = "Vento zonal")
+    ax[0,1].set(title = "Vento meridional")
+    
+    ax[0,1].xaxis.set_major_formatter(dates.DateFormatter('%b'))
+    ax[0,1].xaxis.set_major_locator(dates.MonthLocator(interval = 1))
+    
+    fig.text(0.5, 0.05, "Meses")
+    fig.text(.085, 0.4, "Velocidade (m/s)", rotation = "vertical")
