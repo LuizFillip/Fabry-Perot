@@ -82,7 +82,7 @@ def main():
     
     df = load(modeled)
     
-    print(df.describe())
+    #print(df.describe())
     ax1 = plot(ax[0], df, 
                coord = coord, 
                Type = "modelado")
@@ -94,7 +94,7 @@ def main():
                 (df["mer"] > -100)
                 ]
     
-    print(df.describe())
+    #print(df.describe())
     
     ax1.set(xlabel = "")
     ax2 = plot(ax[1], df,  
@@ -104,9 +104,5 @@ def main():
     
 main()
 
-observed = "database/processed_2013.txt"
-
-#df = load(observed)
- 
 #(df.loc[]) 
  
