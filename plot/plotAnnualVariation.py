@@ -39,15 +39,16 @@ def main():
                            sharex = True, 
                            sharey =  'col')
     
-    plt.subplots_adjust(hspace = 0.1, wspace = 0.1)
+    plt.subplots_adjust(hspace = 0.1, 
+                        wspace = 0.1)
     
     coord = ["zon", "mer"]
-    texts = ["(a)", "(b)"]
-    names = ["Zonal","Meridional"]
-    
+  
     for num in range(2):
+        
         ax[0, num].bar(df.index, df[coord[num]],
                        color = "k", label = "FPI (Cariri)")
+        
         ax[1, num].bar(df1.index, df1[coord[num]], 
                        color = "k", label = "HWM-14")
         
@@ -61,5 +62,8 @@ def main():
     ax[0,1].xaxis.set_major_formatter(dates.DateFormatter('%b'))
     ax[0,1].xaxis.set_major_locator(dates.MonthLocator(interval = 1))
     
-    fig.text(0.5, 0.05, "Meses")
-    fig.text(.085, 0.4, "Velocidade (m/s)", rotation = "vertical")
+    fig.text(0.46, 0.05, "Meses (2013)")
+    fig.text(.085, 0.4, "Velocidade (m/s)", 
+             rotation = "vertical")
+    
+main()
