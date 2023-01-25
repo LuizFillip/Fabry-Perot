@@ -2,24 +2,33 @@ import matplotlib.pyplot as plt
 import setup as s
 import matplotlib.dates as dates
 from core import load
-
+import pandas as pd
 
 
 
 def filter_resample(infile):
     
-    df = load(infile)
-    
-    df = df.loc[(df.index.hour >= 20) |
-                 (df.index.hour <= 8)]
-
+    df = load(infile, resample = "True")
 
     df = df.loc[(df["mer"] > -100) &
                 (df["zon"] > -10)]
 
-    df = df.resample("3H").mean() 
+    out = []
 
-    return df.loc[df.index.hour == 21]
+    for name in ["zon", "mer"]:
+        df_ = pd.pivot_table(df, 
+                            values = name, 
+                            index = "time2", 
+                            columns = "day")
+        
+        df1 = df_.mean(axis = 0).to_frame()
+        df1.rename(columns = {0: name}, inplace = True)
+        out.append(df1)
+
+    return pd.concat(out, axis = 1)
+
+
+
 
 def main():
 
@@ -36,7 +45,7 @@ def main():
                            ncols = 2,
                            sharex = True, 
                            sharey =  'col')
-    s.config_labels()
+    s.config_labels(fontsize= 13)
     plt.subplots_adjust(hspace = 0.1, 
                         wspace = 0.1)
     

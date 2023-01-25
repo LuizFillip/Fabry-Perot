@@ -8,9 +8,9 @@ from process import running_avg
 from utils import translate
 
 
-def plotErrobar(ax, df, up, translate = False):
+def plotErrobar(ax, df, up, trad = False):
     
-    if translate:
+    if trad:
         label = translate(up).title()
     else:
         label = up.title()
@@ -68,9 +68,9 @@ def main():
     for up, down in zip(coords["zon"], 
                         coords["mer"]):
         
-        plotErrobar(ax[0], df, up)
+        plotErrobar(ax[0], df, up, trad = False)
        
-        plotErrobar(ax[1], df, down)
+        plotErrobar(ax[1], df, down, trad = False)
       
         
     ax[0].set(ylabel = "Velocidade (m/s)", 
@@ -83,7 +83,8 @@ def main():
     
     fig.text(0.85, -0.15, "Hora universal (UT)", 
              transform = ax[0].transAxes)
-    
+    date = df.index[0].strftime("%d/%M/%Y")
+    fig.suptitle(f"Cariri - {date}")
     names = ["zonal", "meridional"]
     
     for i, ax in enumerate(ax.flat):
@@ -98,3 +99,5 @@ def main():
         
         ax.set(title =  f"Vento {di}")
         ax.axhline(0, color = "k", linestyle = "--")
+        
+main()
