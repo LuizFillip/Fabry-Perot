@@ -85,18 +85,26 @@ class FabryPerot(object):
                 
         df.loc[(df['dir'] == 'east') | 
                (df['dir'] == 'west'), 
-               'vnu'] = (df['vnu'] / (np.cos(np.radians(df['elm']))*
-                                      np.sin(np.radians(df['azm']))))
+               'vnu'] = self.zonal(df['vnu'], df['elm'], df['azm']) 
 
         df.loc[(df['dir'] == 'north') | 
                (df['dir'] == 'south'), 
-               'vnu'] = (df['vnu'] / (np.cos(np.radians(df['elm']))*
-                                      np.cos(np.radians(df['azm']))))
+               'vnu'] = self.meridional(df['vnu'], df['elm'], df['azm']) 
+        
                                      
         self.df = df
-        
     
-                                                 
+    @staticmethod
+    def meridional(vnu, elm, azm):
+        A = np.radians(azm)
+        E = np.radians(elm)
+        return vnu / (np.cos(E)*np.cos(A))
+    @staticmethod
+    def zonal(vnu, elm, azm):
+        A = np.radians(azm)
+        E = np.radians(elm)
+        return vnu / (np.cos(E)*np.sin(A))
+                                                     
     @property    
     def temp(self):
         
@@ -175,7 +183,5 @@ def main():
     observed = "database/processed_2013.txt"
     
     df = load(observed)
-    
-    print(df.resample("1H").mean())
-    
+        
 #main()
