@@ -15,7 +15,7 @@ def plot(
     
     if coord == "zon": 
         label = "zonal"
-        vmin, vmax, step = -100, 150, 50
+        vmin, vmax, step = -10, 150, 50
     else:
         label = "meridional"
         vmin, vmax, step = -100, 100, 50
@@ -29,19 +29,13 @@ def plot(
     
     df = df.interpolate()
     
-    
-    
-
     X, Y = np.meshgrid(df.columns, df.index)
     Z = df.values
     
     img = ax.pcolormesh(X, Y, Z,  vmax = vmax, 
                       vmin = vmin, 
                       cmap = "jet") 
-   
-    
-    #img = ax.contourf(X, Y, Z, 50,  cmap = "jet") 
-    
+       
     s.colorbar_setting(
         img, ax, 
         ticks = np.arange(vmin, 
@@ -57,7 +51,7 @@ def plot(
         yticks = np.arange(20, 34, 2)
            )
     
-    ax.text(0.01, 0.9, f"Vento {Type}", 
+    ax.text(0.01, 1.01, f"Vento {Type}", 
             transform = ax.transAxes) 
     
     ax.xaxis.set_major_formatter(dates.DateFormatter('%b'))
@@ -89,7 +83,7 @@ def main():
     
     df = load(observed)
 
-    df = df.loc[(df["zon"] > -100) &
+    df = df.loc[(df["zon"] > -10) &
                 (df["zon"] < 170) & 
                 (df["mer"] > -100)
                 ]

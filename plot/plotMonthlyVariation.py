@@ -1,6 +1,4 @@
-import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
 import setup as s
 import matplotlib.dates as dates
 from core import load
@@ -38,7 +36,7 @@ def main():
                            ncols = 2,
                            sharex = True, 
                            sharey =  'col')
-    
+    s.config_labels()
     plt.subplots_adjust(hspace = 0.1, 
                         wspace = 0.1)
     
