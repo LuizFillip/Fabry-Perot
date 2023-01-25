@@ -106,8 +106,8 @@ class FabryPerot(object):
     @property
     def wind(self):
         
-        cond  = ((self.df["VNU"] < 200) & 
-                 (self.df["VNU"] > -100) )
+        cond  = ((self.df["vnu"] < 200) & 
+                 (self.df["vnu"] > -100) )
         
         return self.df.loc[cond, ["vnu", "dvnu", 
                                "dir", "time"]]
@@ -122,7 +122,8 @@ def resample_interpolate(dat, sample = '5min'):
                               freq = sample)
     chuck = pd.DataFrame(index = new_index)
     
-    chuck = pd.concat([dat, chuck], axis = 1).interpolate()
+    chuck = pd.concat([dat, chuck], 
+                      axis = 1).interpolate()
     
     return chuck.resample(sample).asfreq()
 

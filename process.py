@@ -1,16 +1,15 @@
 from core import FabryPerot
 import os 
-import datetime as dt
-from utils import file_attrs, datetime_to_float 
+from utils import file_attrs
 import pandas as pd
     
     
 def running_avg(df, 
-                Dir = "zonal", 
+                Dir = "zon", 
                 sample = "30min"):
     
     coords = {"zon": ("west", "east"), 
-             "mer": ("north", "south")}
+              "mer": ("north", "south")}
     
     up, down = coords[Dir] 
 
