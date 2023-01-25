@@ -1,6 +1,7 @@
 import os
 import datetime as dt
 import numpy as np
+from translate import Translator
 
 def get_endswith_extension(infile, 
                            extention = ".txt"):
@@ -15,10 +16,7 @@ def get_endswith_extension(infile,
 def datetime_to_float(res):
     
     hour = res.index.hour + res.index.minute / 60
- 
     return np.where(hour >= 9, hour, hour + 24)
-
-
 
 def monthToNum(shortMonth):
     return {
@@ -51,4 +49,7 @@ class file_attrs(object):
         date_str = obs_list[0]
         self.date = dt.datetime.strptime(date_str, "%Y%m%d")
     
-   
+
+def translate(string):
+    translator= Translator(to_lang="pt")
+    return translator.translate(string)
