@@ -1,7 +1,7 @@
 import numpy as np 
 import pandas as pd
 from datetime import timedelta
-from utils import datetime_to_float
+from fpi_utils import datetime_to_float
 
 
 class FabryPerot(object):
@@ -122,12 +122,15 @@ class FabryPerot(object):
 
 
 def resample_interpolate(dat, sample = '5min'):
+    
     start = dat.index[0].date()
+    
     end = start + timedelta(days = 1)  
     
     new_index = pd.date_range(f"{start} 21:00", 
                               f"{end} 08:00", 
                               freq = sample)
+    
     chuck = pd.DataFrame(index = new_index)
     
     chuck = pd.concat([dat, chuck], 
