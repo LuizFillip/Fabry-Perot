@@ -15,7 +15,7 @@ def plot(
     
     if coord == "zon": 
         label = "zonal"
-        vmin, vmax, step = -10, 150, 50
+        vmin, vmax, step = -100, 150, 50
     else:
         label = "meridional"
         vmin, vmax, step = -100, 100, 50
@@ -96,7 +96,6 @@ def main():
     
     ax2.set(title = "")
     
-main()
 
 #(df.loc[]) 
  

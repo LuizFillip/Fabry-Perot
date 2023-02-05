@@ -1,4 +1,3 @@
-import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as dates
 import numpy as np
@@ -20,10 +19,10 @@ def plotErrobar(ax, df, up, trad = False):
     zon = df.loc[(df["dir"] == up)]
 
     ax.errorbar(zon.index, 
-                   zon["vnu"], 
-                   yerr = zon["dvnu"], 
-                   **args, 
-                   label = label)
+                zon["vnu"], 
+                yerr = zon["dvnu"], 
+                **args, 
+                label = label)
     
     ax.legend()
     
@@ -48,13 +47,13 @@ def plotAvg(ax, df, di, sample = "30min",
     ax.legend()
 
 def main():
-    infile = 'database/2013/minime01_car_20130107.cedar.005.txt'
+    infile = 'database/2013/minime01_car_20130203.cedar.005.txt'
     
     df = FabryPerot(infile).wind
     
     
     fig, ax = plt.subplots(ncols = 2, 
-                           figsize = (16, 4), 
+                           figsize = (16, 6), 
                            sharex = True, 
                            sharey = True)
     
@@ -83,8 +82,10 @@ def main():
     
     fig.text(0.85, -0.15, "Hora universal (UT)", 
              transform = ax[0].transAxes)
+    
     date = df.index[0].strftime("%d/%M/%Y")
     fig.suptitle(f"Cariri - {date}")
+    
     names = ["zonal", "meridional"]
     
     for i, ax in enumerate(ax.flat):
