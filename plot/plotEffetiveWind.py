@@ -57,3 +57,5 @@ def main():
     ax.legend()
     
     s.format_axes_date(ax, time_scale="hour", interval = 2)
+
+main()

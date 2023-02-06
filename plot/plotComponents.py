@@ -1,10 +1,9 @@
 import matplotlib.pyplot as plt
-import matplotlib.dates as dates
 import numpy as np
 from core import FabryPerot
 import setup as s
 from process import running_avg
-from utils import translate
+from fpi_utils import translate
 
 
 def plotErrobar(ax, df, up, trad = False):
@@ -46,9 +45,8 @@ def plotAvg(ax, df, di, sample = "30min",
     
     ax.legend()
 
-def main():
-    infile = 'database/2013/minime01_car_20130203.cedar.005.txt'
-    
+def plotNighttime(infile, avg = False):
+
     df = FabryPerot(infile).wind
     
     
@@ -76,14 +74,13 @@ def main():
               yticks = np.arange(-100, 250, 50), 
               ylim = [-100, 200])
     
-    ax[0].xaxis.set_major_formatter(dates.DateFormatter('%H:%M'))
-    ax[0].xaxis.set_major_locator(dates.HourLocator(interval = 2))
     
+    s.format_axes_date(ax[0], time_scale = "hour")
     
     fig.text(0.85, -0.15, "Hora universal (UT)", 
              transform = ax[0].transAxes)
     
-    date = df.index[0].strftime("%d/%M/%Y")
+    date = df.index[0].strftime("%d/%m/%Y")
     fig.suptitle(f"Cariri - {date}")
     
     names = ["zonal", "meridional"]
@@ -91,9 +88,9 @@ def main():
     for i, ax in enumerate(ax.flat):
         
         di = names[i]
-        
-        plotAvg(ax, df, di)
-        plotAvg(ax, df, di, sample="3H", 
+        if avg:
+            plotAvg(ax, df, di)
+            plotAvg(ax, df, di, sample="3H", 
                 label = "3H", 
                 color = "r")
         
@@ -101,4 +98,7 @@ def main():
         ax.set(title =  f"Vento {di}")
         ax.axhline(0, color = "k", linestyle = "--")
         
-main()
+
+infile = 'database/2013/minime01_car_20130101.cedar.005.txt'
+    
+plotNighttime(infile, avg = False)
