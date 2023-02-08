@@ -1,7 +1,7 @@
 import numpy as np 
 import pandas as pd
 from datetime import timedelta
-from fpi_utils import datetime_to_float
+from FabryPerot.fpi_utils import datetime_to_float
 
 
 class FabryPerot(object):

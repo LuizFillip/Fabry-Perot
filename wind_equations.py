@@ -2,15 +2,18 @@ import pyIGRF
 import numpy as np
 
 
+#class effective_winds():
+    
+
 def CarrascoEquation(zon, mer, d, i):
     D = np.radians(d)
     I = np.radians(i)
-    return (zon * np.cos(D) + mer * np.sin(D)) * np.sin(I) #np.cos(I)
+    return (zon * np.cos(D) + mer * np.sin(D)) #* np.sin(I) 
 
-def FagundesEquation(zon, mer, d, i):
+def PauloEquation(zon, mer, d, i):
     D = np.radians(d)
     I = np.radians(i)
-    return (mer * np.cos(D) - zon * np.sin(D)) * np.sin(I)
+    return (mer * np.cos(D) + zon * np.sin(D)) * np.cos(I)
 
 
 coords = {"car": (-7.38, -36.528), 
@@ -28,3 +31,6 @@ def run_igrf(site = "car",
                                             alt = alt, 
                                             year = year)
     return d, i 
+
+
+print(1 / np.sqrt(10))

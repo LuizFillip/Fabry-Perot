@@ -6,7 +6,11 @@ from process import running_avg
 from fpi_utils import translate
 
 
-def plotErrobar(ax, df, up, trad = False):
+def plotErrobar(ax, 
+                df, 
+                up, 
+                par = "vnu", 
+                trad = False):
     
     if trad:
         label = translate(up).title()
@@ -18,8 +22,8 @@ def plotErrobar(ax, df, up, trad = False):
     zon = df.loc[(df["dir"] == up)]
 
     ax.errorbar(zon.index, 
-                zon["vnu"], 
-                yerr = zon["dvnu"], 
+                zon[par], 
+                yerr = zon[f"d{par}"], 
                 **args, 
                 label = label)
     
@@ -47,9 +51,8 @@ def plotAvg(ax, df, di, sample = "30min",
 
 def plotNighttime(infile, avg = False):
 
-    df = FabryPerot(infile).wind
-    
-    
+    df = FabryPerot(infile).temp
+        
     fig, ax = plt.subplots(ncols = 2, 
                            figsize = (16, 6), 
                            sharex = True, 
@@ -59,21 +62,19 @@ def plotNighttime(infile, avg = False):
     
     s.config_labels(fontsize = 15)
     
-    coords = {"zon": ("east", "west"), 
-             "mer": ("north", "south")}
+    coor = {"zon": ("east", "west"), 
+            "mer": ("north", "south")}
     
-    for up, down in zip(coords["zon"], 
-                        coords["mer"]):
+    for up, down in zip(coor["zon"], coor["mer"]):
         
         plotErrobar(ax[0], df, up, trad = False)
        
         plotErrobar(ax[1], df, down, trad = False)
       
         
-    ax[0].set(ylabel = "Velocidade (m/s)", 
-              yticks = np.arange(-100, 250, 50), 
-              ylim = [-100, 200])
-    
+    ax[0].set(ylabel = "Velocidade (m/s)")
+             # yticks = np.arange(-100, 250, 50), 
+             # ylim = [-100, 200])
     
     s.format_axes_date(ax[0], time_scale = "hour")
     
@@ -96,7 +97,7 @@ def plotNighttime(infile, avg = False):
         
         
         ax.set(title =  f"Vento {di}")
-        ax.axhline(0, color = "k", linestyle = "--")
+        #ax.axhline(0, color = "k", linestyle = "--")
         
 
 infile = 'database/2013/minime01_car_20130101.cedar.005.txt'

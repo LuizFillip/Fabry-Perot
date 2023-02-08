@@ -1,6 +1,6 @@
 from core import FabryPerot
 import os 
-from utils import file_attrs
+from fpi_utils import file_attrs
 import pandas as pd
     
     
