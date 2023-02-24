@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import setup as s
 import matplotlib.dates as dates
-from core import load
+from FabryPerot.core import load
+from build import paths as p
+
 
 def plot(
         ax, 
@@ -32,9 +34,12 @@ def plot(
     X, Y = np.meshgrid(df.columns, df.index)
     Z = df.values
     
-    img = ax.pcolormesh(X, Y, Z,  vmax = vmax, 
-                      vmin = vmin, 
-                      cmap = "jet") 
+    img = ax.pcolormesh(
+        X, Y, Z,  
+        vmax = vmax, 
+        vmin = vmin, 
+        cmap = "jet"
+        ) 
        
     s.colorbar_setting(
         img, ax, 
@@ -54,13 +59,12 @@ def plot(
     ax.text(0.01, 1.01, f"Vento {Type}", 
             transform = ax.transAxes) 
     
-    ax.xaxis.set_major_formatter(dates.DateFormatter('%b'))
-    ax.xaxis.set_major_locator(dates.MonthLocator(interval = 1))
+    s.format_axes_date(ax)
     
     return ax
 
 
-def main():
+def plotCompare_Model_Observation(coord = "zon"):
 
     fig, ax = plt.subplots(figsize = (8, 6), 
                            nrows = 2, 
@@ -69,14 +73,11 @@ def main():
     s.config_labels()
     plt.subplots_adjust(hspace = 0.1)
     
-    modeled = "database/HWM/cariri_winds_2013.txt"
-    observed = "database/processed_2013.txt"
-    
-    coord = "zon"
-    
+    modeled = p("HWM").files[1]
+    observed = p("FabryPerot").get_files_in_dir("processed")
+        
     df = load(modeled)
     
-    #print(df.describe())
     ax1 = plot(ax[0], df, 
                coord = coord, 
                Type = "modelado")
@@ -84,18 +85,16 @@ def main():
     df = load(observed)
 
     df = df.loc[(df["zon"] > -10) &
-                (df["zon"] < 170) & 
-                (df["mer"] > -100)
+                (df["zon"] < 170) #& 
+                #(df["mer"] > -100)
                 ]
-    
-    #print(df.describe())
-    
+        
     ax1.set(xlabel = "")
     ax2 = plot(ax[1], df,  
                coord = coord)
     
     ax2.set(title = "")
     
+plotCompare_Model_Observation()
 
-#(df.loc[]) 
  
