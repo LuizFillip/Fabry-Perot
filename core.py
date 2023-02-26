@@ -115,7 +115,7 @@ class FabryPerot(object):
                                "dir", "time"]]
 
 
-def resample_interpolate(df, sample = '5min'):
+def resample_and_interpol(df, sample = '10min'):
     
     start = df.index[0].date()
     
@@ -128,26 +128,11 @@ def resample_interpolate(df, sample = '5min'):
     chuck = pd.DataFrame(index = new_index)
     
     chuck = pd.concat([df, chuck], 
-                      axis = 1).interpolate()
+                      axis = 1).interpolate().ffill().bfill()
     
     return chuck.resample(sample).asfreq()
 
 
-def get_mean(df, zonal = True, sample = "10min"):
-
-    out = []
-    
-    if zonal:
-        coords =  ["west", "east"]
-    else:
-        coords =  ["north", "south"]
-    
-    for coord in coords:
-        dat = df.loc[(df["dir"] == coord), "vnu"]
-        out.append(resample_interpolate(dat))
-     
-    ds = pd.concat(out, axis = 1)
-    return ds.mean(axis = 1).resample(sample).asfreq()
 
 def load_FPI(resample = None, 
              lim_zon = (-10, 200), 
