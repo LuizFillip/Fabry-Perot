@@ -1,12 +1,12 @@
-from core import FabryPerot
+from FabryPerot.core import FabryPerot
 import os 
-from fpi_utils import file_attrs
+from FabryPerot.fpi_utils import file_attrs
 import pandas as pd
-    
+from build import paths as p
     
 def running_avg(df, 
                 Dir = "zon", 
-                sample = "30min"):
+                sample = "10min"):
     
     coords = {"zon": ("west", "east"), 
               "mer": ("north", "south")}
@@ -31,29 +31,38 @@ def concat_dir(df):
 
 
 
-def run_for_all_days(infile, save = True):
+def run_year(year = 2013):
     
-    _, _, files = next(os.walk(infile))
+    year = str(year)
+    
+    files = p("FabryPerot")
 
     out = []
     
-    for filename in files:
-    
-        date = file_attrs(filename).date
+    for filename in files.get_files_in_dir(year):
+        
+        f = os.path.split(filename)[-1]
+        
+        date = file_attrs(f).date
         print("processing...", date)
-        fp = FabryPerot(infile + filename).wind
-        out.append(concat_dir(fp))
+        out.append(concat_dir(FabryPerot(filename).wind))
      
     df = pd.concat(out)
-    if save:
-        df.to_csv("database/processed_2013.txt", index = True)
+    
+    save = os.path.join(p("FabryPerot").root, 
+                        "PRO", 
+                        f"{year}.txt")
+    
+    df.to_csv(save, index = True)
+    
     return df
 
 
 
 def main():
-    infile = "database/2013/"
 
-    df = run_for_all_days(infile)
+    df = run_year()
+    
+    print(df)
     
 
