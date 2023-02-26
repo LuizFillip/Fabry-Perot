@@ -1,6 +1,6 @@
 import numpy as np 
 import pandas as pd
-from datetime import timedelta
+import datetime as dt
 from build import paths as p
 
 
@@ -115,22 +115,42 @@ class FabryPerot(object):
                                "dir", "time"]]
 
 
-def resample_and_interpol(df, sample = '10min'):
+def new_index(df):
+    check_days = np.unique(df.index.date)
     
-    start = df.index[0].date()
+    delta = dt.timedelta(days = 1)  
     
-    end = start + timedelta(days = 1)  
+    if len(check_days) == 2:
+        start = check_days[0]
+        end = start + delta
+        
+    else:
+        start = df.index[0]
+        chuck = dt.datetime.combine(start, dt.time(0, 0))
+        if start > chuck:
+            start = chuck - delta
+            end = chuck
+        
+        else:
+            start = chuck
+            end = chuck + delta 
+            
+    return pd.date_range(
+        f"{start} 21:00", f"{end} 08:00",
+        freq = "10min"
+        )  
+
+def resample_and_interpol(df):
     
-    new_index = pd.date_range(f"{start} 21:00", 
-                              f"{end} 08:00", 
-                              freq = sample)
+   
+    chuck = pd.DataFrame(index = new_index(df))
     
-    chuck = pd.DataFrame(index = new_index)
+    chuck = pd.concat(
+        [df, chuck], 
+        axis = 1
+        ).interpolate().ffill().bfill()
     
-    chuck = pd.concat([df, chuck], 
-                      axis = 1).interpolate().ffill().bfill()
-    
-    return chuck.resample(sample).asfreq()
+    return chuck.resample('10min').asfreq()
 
 
 
@@ -147,11 +167,9 @@ def load_FPI(resample = None,
     infile = p("FabryPerot").get_files_in_dir("PRO")
 
     
-    df = pd.read_csv(infile, index_col = "time")
+    df = pd.read_csv(infile, index_col = 0)
     df.index = pd.to_datetime(df.index)
     
-    df.index.name = ""
-
     if resample is not None:
         df = df.resample(resample).mean()
     
@@ -161,4 +179,5 @@ def load_FPI(resample = None,
                 (df["mer"] > lim_mer[0]) & 
                 (df["mer"] < lim_mer[-1]), :]
     return df 
+
 
