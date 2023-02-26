@@ -1,68 +1,70 @@
-from FabryPerot.core import FabryPerot
-import os 
-from FabryPerot.fpi_utils import file_attrs
+from FabryPerot.core import resample_and_interpol, FabryPerot
 import pandas as pd
 from build import paths as p
-    
-def running_avg(df, 
-                Dir = "zon", 
-                sample = "10min"):
+import matplotlib.pyplot as plt
+from FabryPerot.utils import time2float
+import os 
+
+
+
+def running_avg(df, Dir, Type = "vnu"):
     
     coords = {"zon": ("west", "east"), 
               "mer": ("north", "south")}
     
     up, down = coords[Dir] 
-
+    
     fp = df.loc[(df["dir"] == up) | 
-                (df["dir"] == down), "vnu"]
-    
-    chunk = fp.resample(sample).mean().to_frame()
-    
-    return chunk.rename(columns = {"vnu": Dir})
+                (df["dir"] == down), [Type]]
+     
+    return resample_and_interpol(
+        fp)[Type].to_frame(name = Dir)
 
-def concat_dir(df):
-    
+
+def concat_directions(df):
     out = []
     for coord in ["zon", "mer"]:
         out.append(running_avg(df, Dir = coord))
-    f = pd.concat(out, axis = 1)
-    f.index.name = "time"
-    return f
+    return pd.concat(out, axis = 1)
 
 
+def reindex_and_separe(df, Dir = "zon"):
+    dn = df.index.date[0]
+    print("processing...", dn)
+    df.index = time2float(df.index.time, sum24 = True)
+    return df[Dir].to_frame(name = dn)
 
-def run_year(year = 2013):
+def get_monthly_mean(Dir = "zon", 
+                     year = 2013):
     
     year = str(year)
     
-    files = p("FabryPerot")
+    f = p("FabryPerot")
 
     out = []
-    
-    for filename in files.get_files_in_dir(year):
+    for infile in f.get_files_in_dir(year):
         
-        f = os.path.split(filename)[-1]
-        
-        date = file_attrs(f).date
-        print("processing...", date)
-        out.append(concat_dir(FabryPerot(filename).wind))
-     
-    df = pd.concat(out)
+        try:
+            df = concat_directions(FabryPerot(infile).wind)
+            if len(df) < 71:
+                out.append(
+                    reindex_and_separe(df, Dir = Dir))
+            else:
+                pass
+        except:
+            continue
+
+    df = pd.concat(out, axis = 1)
     
-    save = os.path.join(p("FabryPerot").root, 
-                        "PRO", 
-                        f"{year}.txt")
+    name_to_save = f"{Dir}_{year}.txt"
+    save_in = os.path.join(f.get_dir("avg"), 
+                           name_to_save)
     
-    df.to_csv(save, index = True)
-    
+    df.to_csv(save_in, index = True)
+
     return df
 
 
 
-def main():
-
-    df = run_year()
     
-    print(df)
     
-
