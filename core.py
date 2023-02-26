@@ -1,7 +1,7 @@
 import numpy as np 
 import pandas as pd
 from datetime import timedelta
-from FabryPerot.fpi_utils import datetime_to_float
+from build import paths as p
 
 
 class FabryPerot(object):
@@ -62,7 +62,6 @@ class FabryPerot(object):
         names = ['year', 'month', 'day', 
                  'hour', 'minute', 'second']
         
-      
         
         for num, elem in enumerate(df.columns):
             if num < 6:
@@ -79,7 +78,6 @@ class FabryPerot(object):
         other_cols = ['recno', 'kindat', 'kinst', 'gdalt', 
                       'dgdalt', 'ut1_unix', 'ut2_unix', 
                       'wavlen', 'rlel', 'drlel', 'doppl_ref']
-        
         
         df = df.drop(names + other_cols, axis = 1) 
                 
@@ -98,32 +96,28 @@ class FabryPerot(object):
     def meridional(vnu, elm, azm):
         A = np.radians(azm)
         E = np.radians(elm)
-        return vnu / (np.cos(E)*np.cos(A))
+        return vnu / (np.cos(E) * np.cos(A))
+    
     @staticmethod
     def zonal(vnu, elm, azm):
         A = np.radians(azm)
         E = np.radians(elm)
-        return vnu / (np.cos(E)*np.sin(A))
+        return vnu / (np.cos(E) * np.sin(A))
                                                      
     @property    
     def temp(self):
-        
         return self.df.loc[:, ["tn", "dtn", 
                                "dir", "time"]]
     
     @property
     def wind(self):
-        
-        cond  = ((self.df["vnu"] < 200) & 
-                 (self.df["vnu"] > -100) )
-        
-        return self.df.loc[cond, ["vnu", "dvnu", 
+        return self.df.loc[:, ["vnu", "dvnu", 
                                "dir", "time"]]
 
 
-def resample_interpolate(dat, sample = '5min'):
+def resample_interpolate(df, sample = '5min'):
     
-    start = dat.index[0].date()
+    start = df.index[0].date()
     
     end = start + timedelta(days = 1)  
     
@@ -133,7 +127,7 @@ def resample_interpolate(dat, sample = '5min'):
     
     chuck = pd.DataFrame(index = new_index)
     
-    chuck = pd.concat([dat, chuck], 
+    chuck = pd.concat([df, chuck], 
                       axis = 1).interpolate()
     
     return chuck.resample(sample).asfreq()
@@ -155,36 +149,31 @@ def get_mean(df, zonal = True, sample = "10min"):
     ds = pd.concat(out, axis = 1)
     return ds.mean(axis = 1).resample(sample).asfreq()
 
-def load(infile, resample = False):
-    """Load processed data (FPI pipeline) and 
-    HWM-14 model results"""
+def load_FPI(resample = None, 
+             lim_zon = (-10, 200), 
+             lim_mer = (-120, 120)):
+    
+    """
+    Load processed data (FPI pipeline) from 
+    running average of zonal (east and west) 
+    and meridional (north and south) directions
+    """
+    
+    infile = p("FabryPerot").get_files_in_dir("PRO")
+
     
     df = pd.read_csv(infile, index_col = "time")
     df.index = pd.to_datetime(df.index)
-
-    try:
-        del df["Unnamed: 0"]
-    except:
-        pass
     
-    if resample:
-        df = df.resample("1H").mean()
+    df.index.name = ""
+
+    if resample is not None:
+        df = df.resample(resample).mean()
     
-    df["time2"] = datetime_to_float(df)
-    df["day"] = df.index.date
 
+    df = df.loc[(df["zon"] > lim_zon[0]) & 
+                (df["zon"] < lim_zon[-1]) &
+                (df["mer"] > lim_mer[0]) & 
+                (df["mer"] < lim_mer[-1]), :]
+    return df 
 
-    return df.loc[(df.index.hour >= 20) |
-                 (df.index.hour <= 8)]
-
-
-
-def main():
-
-    infile = "database/2013/minime01_car_20130420.cedar.002.txt"
-    
-    observed = "database/processed_2013.txt"
-    
-    df = load(observed)
-        
-#main()
