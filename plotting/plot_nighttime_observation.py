@@ -1,21 +1,15 @@
 import matplotlib.pyplot as plt
-import numpy as np
-from core import FabryPerot
+from FabryPerot.core import FabryPerot
 import setup as s
-from process import running_avg
-from fpi_utils import translate
-
+from FabryPerot.base import running_avg
+from build import paths as p
 
 def plotErrobar(ax, 
                 df, 
                 up, 
-                par = "vnu", 
-                trad = False):
+                par = "vnu"):
     
-    if trad:
-        label = translate(up).title()
-    else:
-        label = up.title()
+    label = up.title()
     
     args = dict(capsize = 2, lw = 1.5)
     
@@ -30,31 +24,45 @@ def plotErrobar(ax,
     ax.legend()
     
     
-def plotAvg(ax, df, di, sample = "30min", 
-            label = "30 min", 
+def plot_average(ax, df, di, sample = "10min", 
             marker = "s",
             color = "k"):
     
     args = dict(marker = marker,
                 color = color, 
-                lw = 2)
+                lw = 2, 
+                fillstyle = "none")
 
-    avg30 = running_avg(df, 
-                    Dir = di[:3], 
-                    sample = sample)
+    avg30 = running_avg(df, Dir = di[:3])
     
     ax.plot(avg30, 
             **args,
-            label = f"Média ({label})")
+            label = f"Média ({sample})")
     
     ax.legend()
+    
+    
+def plot_attrs(ax, df):
+    names = ["zonal", "meridional"]
+    for i, ax in enumerate(ax.flat):
+        
+        di = names[i]
+        
+        plot_average(ax, df, di)
+          
+        ax.set(title =  f"Vento {di}")
+        ax.axhline(0, color = "r", linestyle = "--")
 
-def plotNighttime(infile, avg = False):
-
-    df = FabryPerot(infile).temp
+def plot_nighttime_observation(infile, 
+                               Type = "wind"):
+    
+    if Type == "wind":
+        df = FabryPerot(infile).wind
+    else:
+        df = FabryPerot(infile).temp
         
     fig, ax = plt.subplots(ncols = 2, 
-                           figsize = (16, 6), 
+                           figsize = (12, 4), 
                            sharex = True, 
                            sharey = True)
     
@@ -67,14 +75,12 @@ def plotNighttime(infile, avg = False):
     
     for up, down in zip(coor["zon"], coor["mer"]):
         
-        plotErrobar(ax[0], df, up, trad = False)
+        plotErrobar(ax[0], df, up)
        
-        plotErrobar(ax[1], df, down, trad = False)
+        plotErrobar(ax[1], df, down)
       
         
     ax[0].set(ylabel = "Velocidade (m/s)")
-             # yticks = np.arange(-100, 250, 50), 
-             # ylim = [-100, 200])
     
     s.format_axes_date(ax[0], time_scale = "hour")
     
@@ -84,22 +90,18 @@ def plotNighttime(infile, avg = False):
     date = df.index[0].strftime("%d/%m/%Y")
     fig.suptitle(f"Cariri - {date}")
     
-    names = ["zonal", "meridional"]
+    plot_attrs(ax, df)
     
-    for i, ax in enumerate(ax.flat):
+    return fig, ax 
         
-        di = names[i]
-        if avg:
-            plotAvg(ax, df, di)
-            plotAvg(ax, df, di, sample="3H", 
-                label = "3H", 
-                color = "r")
+def main():
         
-        
-        ax.set(title =  f"Vento {di}")
-        #ax.axhline(0, color = "k", linestyle = "--")
-        
+    files = p("FabryPerot").get_files_in_dir("2013")
+    
+    infile = files[7]
+    
+    print(infile)
+    
+    plot_nighttime_observation(infile)
 
-infile = 'database/2013/minime01_car_20130101.cedar.005.txt'
-    
-plotNighttime(infile, avg = False)
+main()
