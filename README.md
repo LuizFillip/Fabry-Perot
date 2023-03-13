@@ -1,30 +1,12 @@
-# Análise e redução dos dados de Interferômetro Fabry-Perot (FPI)
+# Fabry-Perot Interferometer (data pipeline)
+
+This repository aims to describe the data processing of Fabry-Perot Interferometer (FPI).
+
+See (CEDAR Madrigal Database)[http://cedar.openmadrigal.org/] for more informations about database and files documentation.
+
+- Read file data and separe in differents positions in sky
+- Plotting and analysis themospheric temperature and winds
+- Filter and reduced the data
 
 
-# Filtro e Cálculo das Componentes Zon e Med
 
-
-* Separação de cada direção (Norte, Leste, Oeste, Sul)
-    * Norte ($\alpha  = 45, \theta = 0$)
-    * Leste ($\alpha  = 45, \theta = 90$)
-    * Sul ($\alpha  = 45, \theta = 180$)
-    * Oeste ($\alpha  = 45, \theta = 270$)
-    
-    
-* Fórmula geral:
-    
-    $V_{LOS} = w \sin(\alpha) + [v \cos(\theta) + u \sin(\theta)]\cos(\alpha)$
-  
-    Onde, $\alpha$ é o angulo de elvação (0 horizontal e 90 no zenite) e $\theta$ é ângulo azimute (0 para o Norte e 90 para o Leste). 
-
-* Que nos permite estimar a componente vertical (Zenite)
-    
-    $w = \frac{V_{LOS}}{\sin(\alpha = 90)} = V_{LOS}$
-    
-* Leste e Oeste LOS podem ser usados para calcular a componente zonal 
-
-    $u = \frac{V_{LOS}}{\sin(\theta) \cos(\alpha)}$ 
-
-* Norte e Sul LOS podem ser usados para calcular a componente Meridional 
-
-    $v = \frac{V_{LOS}}{\cos(\theta) \cos(\alpha)}$ 

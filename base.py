@@ -1,10 +1,8 @@
 from FabryPerot.core import resample_and_interpol, FabryPerot
 import pandas as pd
 from build import paths as p
-import matplotlib.pyplot as plt
 from FabryPerot.utils import time2float
 import os 
-
 
 
 def running_avg(df, Dir, Type = "vnu"):
@@ -66,5 +64,7 @@ def get_monthly_mean(Dir = "zon",
 
 
 
-    
+
+
+   
     

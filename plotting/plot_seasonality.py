@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import setup as s
 import matplotlib.dates as dates
-from core import load
+from FabryPerot.core import load
 import pandas as pd
+from build import paths as p
 
 
 
@@ -30,15 +31,14 @@ def filter_resample(infile):
 
 
 
-def main():
+def plot_seasonality():
 
-    modeled = "database/HWM/cariri_winds_2013.txt"
-    observed = "database/processed_2013.txt"
+    modeled = p("HWM").files[1]
+    observed = p("FabryPerot").get_files_in_dir("processed")
     
-
-    df1 = filter_resample(modeled)
+    mod = filter_resample(modeled)
     
-    df = filter_resample(observed)
+    obs = filter_resample(observed)
     
     fig, ax = plt.subplots(figsize = (14, 6), 
                            nrows = 2, 
@@ -53,10 +53,10 @@ def main():
   
     for num in range(2):
         
-        ax[0, num].bar(df.index, df[coord[num]],
+        ax[0, num].bar(obs.index, obs[coord[num]],
                        color = "k", label = "FPI (Cariri)")
         
-        ax[1, num].bar(df1.index, df1[coord[num]], 
+        ax[1, num].bar(mod.index, mod[coord[num]], 
                        color = "k", label = "HWM-14")
         
         ax[1, num].legend(loc = "upper right")
@@ -73,4 +73,3 @@ def main():
     fig.text(.085, 0.4, "Velocidade (m/s)", 
              rotation = "vertical")
     
-main()

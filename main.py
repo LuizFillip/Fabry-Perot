@@ -44,6 +44,6 @@ def main():
     run_year()
     run_monthly_mean()
 
-    print("%s" % (time.time() - start))
+    print("%s seconds" % (time.time() - start))
     
 main()

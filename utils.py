@@ -13,10 +13,26 @@ def get_endswith_extension(infile,
     
     return txt_files
 
-def datetime_to_float(res):
-    
-    hour = res.index.hour + res.index.minute / 60
-    return np.where(hour >= 9, hour, hour + 24)
+def date_to_filename(year, month, day, 
+                     TYPE = "004", 
+                     site = "car"):
+
+    dn = dt.date(year, month, day).strftime("%Y%m%d")
+    return f"minime01_{site}_{dn}.cedar.{TYPE}.txt"
+
+def time2float(time_array, sum24 = False):
+    out = []
+
+    for arr in time_array:
+        
+        hour = (arr.hour + 
+                arr.minute / 60)
+        if sum24:
+            if hour < 20:
+                hour += 24
+        
+        out.append(hour)
+    return out
 
 def monthToNum(shortMonth):
     return {
@@ -34,20 +50,19 @@ def monthToNum(shortMonth):
         'dez': 12
         }[shortMonth]
 
-
-class file_attrs(object):
+def date_from_filename(filename):
     
-    def __init__(self, filename):
-        
-        s = filename.split('_')
-        obs_list = s[-1].split('.')
-        
-        self.intr = s[0]
-        self.site = s[1]
-        self.number = obs_list[1]
-        
-        date_str = obs_list[0]
-        self.date = dt.datetime.strptime(date_str, "%Y%m%d")
+    s = filename.split('_')
+    obs_list = s[-1].split('.')
+    
+    # self.intr = s[0]
+    # self.site = s[1]
+    # self.number = obs_list[1]
+    
+    date_str = obs_list[0]
+    return dt.datetime.strptime(date_str, "%Y%m%d").date()
+    
+    
     
 
 def translate(string):

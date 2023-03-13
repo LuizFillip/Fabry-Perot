@@ -148,14 +148,14 @@ def resample_and_interpol(df):
     chuck = pd.concat(
         [df, chuck], 
         axis = 1
-        ).interpolate().ffill().bfill()
+        ).interpolate()
     
     return chuck.resample('10min').asfreq()
 
 
 
 def load_FPI(resample = None, 
-             lim_zon = (-10, 200), 
+             lim_zon = (-10, 300), 
              lim_mer = (-120, 120)):
     
     """

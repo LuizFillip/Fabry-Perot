@@ -100,8 +100,6 @@ def main():
     
     infile = files[7]
     
-    print(infile)
-    
     plot_nighttime_observation(infile)
 
 main()
