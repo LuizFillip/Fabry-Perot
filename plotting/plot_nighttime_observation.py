@@ -62,7 +62,7 @@ def plot_nighttime_observation(infile,
         df = FabryPerot(infile).temp
         
     fig, ax = plt.subplots(ncols = 2, 
-                           figsize = (12, 4), 
+                           figsize = (14, 4), 
                            sharex = True, 
                            sharey = True)
     
@@ -82,7 +82,8 @@ def plot_nighttime_observation(infile,
         
     ax[0].set(ylabel = "Velocidade (m/s)")
     
-    s.format_axes_date(ax[0], time_scale = "hour")
+    s.format_axes_date(ax[0], time_scale = "hour", 
+                       interval = 2)
     
     fig.text(0.85, -0.15, "Hora universal (UT)", 
              transform = ax[0].transAxes)
@@ -98,7 +99,7 @@ def main():
         
     files = p("FabryPerot").get_files_in_dir("2013")
     
-    infile = files[7]
+    infile = files[0]
     
     plot_nighttime_observation(infile)
 
