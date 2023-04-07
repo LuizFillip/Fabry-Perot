@@ -1,7 +1,5 @@
 import os
 import datetime as dt
-import numpy as np
-from translate import Translator
 
 def get_endswith_extension(infile, 
                            extention = ".txt"):
@@ -62,9 +60,3 @@ def date_from_filename(filename):
     date_str = obs_list[0]
     return dt.datetime.strptime(date_str, "%Y%m%d").date()
     
-    
-    
-
-def translate(string):
-    translator= Translator(to_lang="pt")
-    return translator.translate(string)

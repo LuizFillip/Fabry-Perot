@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
-from FabryPerot.core import FabryPerot
-import setup as s
-from FabryPerot.base import running_avg
+from FabryPerot.src.core import FabryPerot
+from FabryPerot.src.base import running_avg
 from build import paths as p
+import settings as s
+
+
+
+
 
 def plotErrobar(ax, 
                 df, 
@@ -22,6 +26,8 @@ def plotErrobar(ax,
                 label = label)
     
     ax.legend()
+    
+    ax.grid()
     
     
 def plot_average(ax, df, di, sample = "10min", 
@@ -93,13 +99,15 @@ def plot_nighttime_observation(infile,
     
     plot_attrs(ax, df)
     
+    plt.show()
+    
     return fig, ax 
         
 def main():
         
     files = p("FabryPerot").get_files_in_dir("2013")
     
-    infile = files[0]
+    infile = files[1]
     
     plot_nighttime_observation(infile)
 

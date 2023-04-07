@@ -1,7 +1,7 @@
-from FabryPerot.core import resample_and_interpol, FabryPerot
+from FabryPerot.src.core import resample_and_interpol, FabryPerot
 import pandas as pd
 from build import paths as p
-from FabryPerot.utils import time2float
+from FabryPerot.src.utils import time2float
 import os 
 
 

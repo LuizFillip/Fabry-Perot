@@ -1,9 +1,9 @@
 import pandas as pd
-from FabryPerot.utils import file_attrs
 from build import paths as p
 import os
-from FabryPerot.core import FabryPerot
-from FabryPerot.base import concat_directions, get_monthly_mean
+from FabryPerot.src.core import FabryPerot
+from FabryPerot.src.utils import  date_from_filename
+from FabryPerot.src.base import concat_directions, get_monthly_mean
 import time
 
 def run_year(year = 2013):
@@ -17,7 +17,7 @@ def run_year(year = 2013):
     for filename in f.get_files_in_dir(year):
                 
         print("processing...", 
-              file_attrs(os.path.split(filename)[-1]).date)
+              date_from_filename(os.path.split(filename)[-1]))
         try:
             out.append(concat_directions(
                 FabryPerot(filename).wind))
@@ -46,4 +46,3 @@ def main():
 
     print("%s seconds" % (time.time() - start))
     
-main()
