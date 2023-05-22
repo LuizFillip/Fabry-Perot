@@ -1,9 +1,8 @@
 import matplotlib.pyplot as plt
-import setup as s
+import settings as s
 import matplotlib.dates as dates
 from FabryPerot.core import load
 import pandas as pd
-from build import paths as p
 
 
 
@@ -31,14 +30,11 @@ def filter_resample(infile):
 
 
 
-def plot_seasonality():
+def plot_seasonality(path_mod, path_obs):
 
-    modeled = p("HWM").files[1]
-    observed = p("FabryPerot").get_files_in_dir("processed")
+    mod = filter_resample(path_mod)
     
-    mod = filter_resample(modeled)
-    
-    obs = filter_resample(observed)
+    obs = filter_resample(path_obs)
     
     fig, ax = plt.subplots(figsize = (14, 6), 
                            nrows = 2, 

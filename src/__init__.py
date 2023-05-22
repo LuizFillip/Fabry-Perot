@@ -1,8 +1,7 @@
-import os, sys
-
-parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-sys.path.append(parent)
+from .core import FPI, resample_and_interpol, load_FPI
+from .base import running_avg
 
 import settings as s
+
+s.config_labels()
+from .plotting import *
