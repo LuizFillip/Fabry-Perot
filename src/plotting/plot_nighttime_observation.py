@@ -1,8 +1,6 @@
 import matplotlib.pyplot as plt
-from FabryPerot.src.core import FabryPerot
+from FabryPerot import FabryPerot
 from FabryPerot.src.base import running_avg
-from build import paths as p
-import settings as s
 
 
 
@@ -105,10 +103,15 @@ def plot_nighttime_observation(infile,
         
 def main():
         
-    files = p("FabryPerot").get_files_in_dir("2013")
     
     infile = files[1]
     
     plot_nighttime_observation(infile)
 
-main()
+# main()
+
+import os
+
+files = os.listdir("database/FabryPerot/2013/")
+
+files
