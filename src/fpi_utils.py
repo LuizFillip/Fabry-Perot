@@ -18,35 +18,6 @@ def date_to_filename(year, month, day,
     dn = dt.date(year, month, day).strftime("%Y%m%d")
     return f"minime01_{site}_{dn}.cedar.{TYPE}.txt"
 
-def time2float(time_array, sum24 = False):
-    out = []
-
-    for arr in time_array:
-        
-        hour = (arr.hour + 
-                arr.minute / 60)
-        if sum24:
-            if hour < 20:
-                hour += 24
-        
-        out.append(hour)
-    return out
-
-def monthToNum(shortMonth):
-    return {
-        'jan': 1,
-        'fev': 2,
-        'mar': 3,
-        'abr': 4,
-        'mai': 5,
-        'jun': 6,
-        'jul': 7,
-        'ago': 8,
-        'set': 9, 
-        'out': 10,
-        'nov': 11,
-        'dez': 12
-        }[shortMonth]
 
 def date_from_filename(filename):
     
