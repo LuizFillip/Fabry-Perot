@@ -1,6 +1,1 @@
-import os, sys
-
-parent = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-sys.path.append(parent)
+from .plot_nighttime_observation import plot_nighttime_observation
