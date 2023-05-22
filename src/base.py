@@ -1,7 +1,6 @@
-from FabryPerot.src.core import resample_and_interpol, FabryPerot
+from FabryPerot import resample_and_interpol, FabryPerot
 import pandas as pd
-from build import paths as p
-from FabryPerot.src.utils import time2float
+from utils import time2float
 import os 
 
 
@@ -32,18 +31,17 @@ def reindex_and_separe(df, Dir = "zon"):
     df.index = time2float(df.index.time, sum24 = True)
     return df[Dir].to_frame(name = dn)
 
-def get_monthly_mean(Dir = "zon", 
+def get_monthly_mean(infile, 
+                     Dir = "zon", 
                      year = 2013):
     
     year = str(year)
     
-    f = p("FabryPerot")
-
     out = []
-    for infile in f.get_files_in_dir(year):
-        
+    for filename in os.listdir(infile):
+        path = os.path.join(infile, filename)
         try:
-            df = concat_directions(FabryPerot(infile).wind)
+            df = concat_directions(FabryPerot(path).wind)
             if len(df) < 71:
                 out.append(
                     reindex_and_separe(df, Dir = Dir))
@@ -55,8 +53,7 @@ def get_monthly_mean(Dir = "zon",
     df = pd.concat(out, axis = 1)
     
     name_to_save = f"{Dir}_{year}.txt"
-    save_in = os.path.join(f.get_dir("avg"), 
-                           name_to_save)
+    save_in = os.path.join(infile, name_to_save)
     
     df.to_csv(save_in, index = True)
 
