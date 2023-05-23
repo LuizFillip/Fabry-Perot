@@ -1,9 +1,7 @@
 import datetime as dt
 import os
-
-from FabryPerot.core import FabryPerot
-from FabryPerot.base import running_avg
-import setup as s
+import FabryPerot as fp
+import settings as s
 import matplotlib.pyplot as plt
 
 def save_img(fig, 
@@ -22,8 +20,8 @@ def save_img(fig,
 
 def plot_time_series(ax, fpi_file, title = "Cariri"):
     
-    wind = FabryPerot(fpi_file).wind
-    avg = running_avg(wind, Dir = "zon")
+    wind = fp.FPI(fpi_file).wind
+    avg = fp.running_avg(wind, Dir = "zon")
     ax.plot(avg, 
             lw = 2, 
             color = "k", 
@@ -73,32 +71,33 @@ def get_datetime_fpi(filename):
     return dt.datetime.strptime(
         date_str, "%Y%m%d")
 
-caj = "database/FabryPerot/caj/"
-car = "database/FabryPerot/2012/"
-
-for f1 in os.listdir(caj):
-    caj_dt = get_datetime_fpi(f1)
-
-    for f2 in os.listdir(car):
-
-        car_dt = get_datetime_fpi(f2)
-        
-        if ((car_dt == caj_dt) and 
-            (car_dt.year == 2013)):
-            car_infile = os.path.join(car, f2)
-            caj_infile = os.path.join(caj, f1)
-            
-            try:
-                fig = plot_both_sites(car_dt, 
-                                car_infile, 
-                                caj_infile)
-                
-                save_in = "C:\\plot2\\"
-                
-                save_img(fig, 
-                         os.path.join(save_in, 
-                                      f1.replace("txt", "png")))
-            except:
-                continue
-
+def same_dates_in_sites(year = 2013):
+    caj = "database/FabryPerot/caj/"
+    car = "database/FabryPerot/2012/"
     
+    out = []
+    
+    for f1 in os.listdir(caj):
+        caj_dt = get_datetime_fpi(f1)
+    
+        for f2 in os.listdir(car):
+    
+            car_dt = get_datetime_fpi(f2)
+            
+            if ((car_dt == caj_dt) and 
+                (car_dt.year == 2013)):
+                car_infile = os.path.join(car, f2)
+                caj_infile = os.path.join(caj, f1)
+                
+                out.append(tuple((car_infile, caj_infile)))
+    
+    return out
+            
+        
+          
+f1, f2 = same_dates_in_sites(year = 2013)´0
+
+
+fig = plot_both_sites(car_dt, 
+                car_infile, 
+                caj_infile)

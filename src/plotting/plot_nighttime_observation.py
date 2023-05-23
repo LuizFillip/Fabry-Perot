@@ -57,7 +57,7 @@ def plot_directions(ax,
                 label = direction
                 )
         ax[i].legend(loc = "upper right", ncols = 3)
-        ax[i].set(ylabel = f"Vento {names[i]} (m/s)")
+        ax[i].set(ylabel = f"Vento {names[i]} (m/s)", ylim = [-150, 150])
         ax[i].axhline(0, color = "k", linestyle = "--")
 
 
@@ -86,9 +86,10 @@ def plot_nighttime_observation(
             tz = "UTC"
             )
 
-    
-    ax[0].set_title("Cariri")
-
+    if "car" in path:    
+        ax[0].set_title("Cariri")
+    else:
+        ax[0].set_title("Cajazeiras")
     return fig, ax 
         
 def main():
@@ -97,8 +98,10 @@ def main():
     files = os.listdir(infile)
 
     filename = files[2]
-        
-    plot_nighttime_observation(os.path.join(infile, filename))
+    path = os.path.join(infile, filename)
+    path = 'database/FabryPerot/2012/minime01_car_20130502.cedar.005.txt'
+    path = 'database/FabryPerot/caj/minime02_caj_20130502.cedar.001.hdf5.txt'
+    plot_nighttime_observation(path)
 
 main()
 
