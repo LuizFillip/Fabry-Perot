@@ -22,8 +22,10 @@ def plot_average(
     
     
 
-def plot_directions(ax,
-        path, parameter = "vnu"
+def plot_directions(
+        ax, 
+        path, 
+        parameter = "vnu"
         ):
     
     if parameter == "vnu":
@@ -56,8 +58,9 @@ def plot_directions(ax,
                 yerr = ds[f"d{parameter}"], 
                 label = direction
                 )
-        ax[i].legend(loc = "upper right", ncols = 3)
-        ax[i].set(ylabel = f"Vento {names[i]} (m/s)", ylim = [-150, 150])
+        ax[i].legend(loc = "upper right", ncol = 2)
+        ax[i].set(ylabel = f"Vento {names[i]} (m/s)", 
+                  ylim = [-200, 200])
         ax[i].axhline(0, color = "k", linestyle = "--")
 
 
@@ -86,10 +89,7 @@ def plot_nighttime_observation(
             tz = "UTC"
             )
 
-    if "car" in path:    
-        ax[0].set_title("Cariri")
-    else:
-        ax[0].set_title("Cajazeiras")
+   
     return fig, ax 
         
 def main():
@@ -100,8 +100,8 @@ def main():
     filename = files[2]
     path = os.path.join(infile, filename)
     path = 'database/FabryPerot/2012/minime01_car_20130502.cedar.005.txt'
-    path = 'database/FabryPerot/caj/minime02_caj_20130502.cedar.001.hdf5.txt'
+    #path = 'database/FabryPerot/caj/minime02_caj_20130502.cedar.001.hdf5.txt'
     plot_nighttime_observation(path)
 
-main()
+# main()
 
