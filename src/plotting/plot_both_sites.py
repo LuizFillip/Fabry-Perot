@@ -4,65 +4,81 @@ import FabryPerot as fp
 import settings as s
 import matplotlib.pyplot as plt
 
-def save_img(fig, 
-             save_in):
-    
-    plt.ioff()
-    fig.savefig(save_in, 
-                dpi = 100, 
-                pad_inches = 0, 
-                bbox_inches = "tight")
-    plt.clf()   
-    plt.close()
-    return 
 
 
 
-def plot_time_series(ax, fpi_file, title = "Cariri"):
+def plot_average(
+        ax, df, di, 
+        sample = "10min", 
+        marker = "s",
+        color = "k"):
     
-    wind = fp.FPI(fpi_file).wind
-    avg = fp.running_avg(wind, Dir = "zon")
-    ax.plot(avg, 
-            lw = 2, 
-            color = "k", 
-            label = "Média")
+    args = dict(marker = marker,
+                lw = 2, 
+                fillstyle = "none")
+
+    avg30 = fp.running_avg(df, Dir = di)
     
-    for up in ("east", "west"):
+    ax.plot(avg30, **args,
+            label = f"Média ({sample})")
+    
+    
+
+
+def plot_directions2(
+        ax, 
+        path, 
+        col = 0,
+        parameter = "vnu"
+        ):
+    
+    if "car" in path:    
+        ax[0, col].set_title("Cariri")
+    else:
+        ax[0, col].set_title("Cajazeiras")
         
-        zon = wind.loc[(wind["dir"] == up)]
+    if parameter == "vnu":
+        df = fp.FPI(path).wind
+    else:
+        df = fp.FPI(path).temp
         
-        ax.errorbar(zon.index, 
-                    zon["vnu"], 
-                    yerr = zon["dvnu"], 
-                    label = up, 
-                    capsize = 3)
+    coords = {
+        "zon": ("east", "west"), 
+        "mer": ("north", "south")
+        }
     
-    ax.axhline(0, color = "r", linestyle = "--")
-    ax.legend(loc = "upper right")                  
+    names = ["zonal", "meridional"]
     
-    ax.set(title = title,
-           ylim = [-50, 250],
-           xlabel = "Hora universal", 
-           ylabel = "Velocidade zonal (m/s)")
-    
-    s.format_axes_date(ax, time_scale= "hour", 
-                       interval = 1)
-    
-def plot_both_sites(date, 
-                    car_infile, 
-                    caj_infile):
-    
-    fig, ax = plt.subplots(ncols = 2, 
-                           figsize = (12, 6), 
-                           sharey = True, 
-                           sharex = True)
+    for i, coord in enumerate(coords.keys()):
+        
+        plot_average(
+               ax[i, col], df, coord, 
+               sample = "10min", 
+               marker = "s",
+               color = "k"
+               )
+        for direction in coords[coord]:
+            
+            ds = df.loc[(df["dir"] == direction)]
+            
+            ax[i, col].errorbar(
+                ds.index, 
+                ds[parameter], 
+                yerr = ds[f"d{parameter}"], 
+                label = direction
+                )
+        ax[i, col].legend(loc = "upper right", ncol = 2)
+        ax[i, col].set(ylabel = f"Vento {names[i]} (m/s)", 
+                  ylim = [-200, 200])
+        ax[i, col].axhline(0, color = "k", linestyle = "--")
+        
+    s.format_time_axes(
+            ax[1, col], hour_locator = 1, 
+            day_locator = 1, 
+            tz = "UTC"
+            )
 
-    plot_time_series(ax[0], car_infile, title = "Cariri")
-    plot_time_series(ax[1], caj_infile, title = "Cajazeiras")
-        
-    fig.suptitle(date.strftime("%d/%m/%Y"))
-    
-    return fig 
+
 
 def get_datetime_fpi(filename):
     s = filename.split('_')
@@ -94,10 +110,56 @@ def same_dates_in_sites(year = 2013):
     return out
             
         
-          
-f1, f2 = same_dates_in_sites(year = 2013)´0
+         
+def plot_both_sites(f1, f2):
+    
+    fig, ax = plt.subplots(
+        nrows = 2, 
+        ncols= 2,
+        figsize = (12, 8), 
+        sharex = True, 
+        sharey = True, 
+        dpi = 300)
+
+    plt.subplots_adjust(hspace = 0.05)
+
+    for col, path in enumerate([f1, f2]):
+        plot_directions2(
+                ax, 
+                path, 
+                col = col,
+                parameter = "vnu"
+                )
+
+    return fig 
 
 
-fig = plot_both_sites(car_dt, 
-                car_infile, 
-                caj_infile)
+
+
+def save_img(fig, 
+             save_in):
+    
+    plt.ioff()
+    fig.savefig(save_in, 
+                dpi = 300, 
+                pad_inches = 0, 
+                bbox_inches = "tight")
+    plt.clf()   
+    plt.close()
+    return 
+
+
+for infiles in same_dates_in_sites(year = 2013):
+    f1, f2 = infiles
+    
+    fig = plot_both_sites(f1, f2)
+    
+    
+    try:
+        FigureName = fp.date_from_filename(f1).strftime("%Y%m%d.png")
+        save_in = "D:\\plots2\\FPI\\"
+        print("saving...", FigureName)
+        save_img(fig, os.path.join(save_in, FigureName))
+    except:
+        continue
+    
