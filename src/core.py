@@ -18,7 +18,7 @@ class FPI(object):
 
         conditions = [
             (df["AZM"] == 0.2) & (df["ELM"] == 45),  # Norte
-            (df["AZM"] == 0) & (df["ELM"] == 45),  # Norte
+            (df["AZM"] == 0) &   (df["ELM"] == 45),  # Norte
             (df["AZM"] == 0.3) & (df["ELM"] == 45),  # Norte
             (df["AZM"] == 180.0) & (df["ELM"] == 45),  # Sul
             (df["AZM"] == -179.8) & (df["ELM"] == 45),  # Sul
@@ -100,13 +100,18 @@ class FPI(object):
 
         df = df.drop(names + other_cols, axis=1)
 
-        df.loc[(df["dir"] == "east") | (df["dir"] == "west"), "vnu"] = self.zonal(
+        df.loc[
+            (df["dir"] == "east") | 
+            (df["dir"] == "west"), "vnu"] = self.zonal(
             df["vnu"], df["elm"], df["azm"]
         )
 
         df.loc[
-            (df["dir"] == "north") | (df["dir"] == "south"), "vnu"
-        ] = self.meridional(df["vnu"], df["elm"], df["azm"])
+            (df["dir"] == "north") |
+            (df["dir"] == "south"), "vnu"
+        ] = self.meridional(
+            df["vnu"],
+                            df["elm"], df["azm"])
 
         self.df = df
 
@@ -131,39 +136,14 @@ class FPI(object):
         return self.df.loc[:, ["vnu", "dvnu", "dir", "time"]]
 
 
-def new_index(df):
-    check_days = np.unique(df.index.date)
-
-    delta = dt.timedelta(days=1)
-
-    if len(check_days) == 2:
-        start = check_days[0]
-        end = start + delta
-
-    else:
-        start = df.index[0]
-        chuck = dt.datetime.combine(start, dt.time(0, 0))
-        if start > chuck:
-            start = chuck - delta
-            end = chuck
-
-        else:
-            start = chuck
-            end = chuck + delta
-
-    return pd.date_range(f"{start} 21:00", f"{end} 08:00", freq="10min")
 
 
-def resample_and_interpol(df):
 
-    chuck = pd.DataFrame(index=new_index(df))
-
-    chuck = pd.concat([df, chuck], axis=1).interpolate()
-
-    return chuck.resample("10min").asfreq()
-
-
-def load_FPI(infile, resample=None, lim_zon=(-10, 300), lim_mer=(-120, 120)):
+def load_FPI(
+        infile, 
+        lim_zon = (-10, 300), 
+        lim_mer = (-120, 120)
+        ):
 
     """
     Load processed data (FPI pipeline) from
@@ -174,11 +154,10 @@ def load_FPI(infile, resample=None, lim_zon=(-10, 300), lim_mer=(-120, 120)):
     df = pd.read_csv(infile, index_col=0)
     df.index = pd.to_datetime(df.index)
 
-    if resample is not None:
-        df = df.resample(resample).mean()
+
 
     df = df.loc[
-        (df["zon"] > lim_zon[0])
+          (df["zon"] > lim_zon[0])
         & (df["zon"] < lim_zon[-1])
         & (df["mer"] > lim_mer[0])
         & (df["mer"] < lim_mer[-1]),
