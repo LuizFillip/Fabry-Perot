@@ -1,55 +1,118 @@
 import FabryPerot as fp
 import pandas as pd
-from utils import time2float
-import os
+import datetime as dt
+import numpy as np
 
 
-def running_avg(df, Dir, Type="vnu"):
+def sep_interval(
+        ds, 
+        dn, 
+        delta = dt.timedelta(seconds = 43200)
+        ):
+    return ds[(ds.index >= dn) & (ds.index <= dn + delta)]
 
-    coords = {"zon": ("west", "east"), "mer": ("north", "south")}
+def split_directions(
+        df, 
+        direction = "zon", 
+        parameter = "vnu"
+        ):
+      
+    df = df.loc[~((df["vnu"] > 300) | (df["vnu"] < -120))]
+    
+    if direction == "zon":
+        ds = df.loc[(df["dir"] == "east") | 
+                    (df["dir"] == "west"), 
+                    [parameter]]
+        
+    else:
+        ds = df.loc[(df["dir"] == "north") | 
+                    (df["dir"] == "south"), 
+                    [parameter]]
+        
+        
+    
+        
+    return ds
+ 
+def new_index(df, freq = "2min"):
+    check_days = np.unique(df.index.date)
 
-    up, down = coords[Dir]
+    delta = dt.timedelta(days=1)
 
-    ds = df.loc[(df["dir"] == up) | (df["dir"] == down), [Type]]
+    if len(check_days) == 2:
+        start = check_days[0]
+        end = start + delta
 
-    return fp.resample_and_interpol(ds)[Type].to_frame(name=Dir)
+    else:
+        start = df.index[0]
+        chuck = dt.datetime.combine(start, dt.time(0, 0))
+        if start > chuck:
+            start = chuck - delta
+            end = chuck
+
+        else:
+            start = chuck
+            end = chuck + delta
+
+    return pd.date_range(f"{start} 21:00", 
+                         f"{end} 07:00", 
+                         freq = freq)
 
 
-def concat_directions(df):
-    out = []
-    for coord in ["zon", "mer"]:
-        out.append(running_avg(df, Dir=coord))
-    return pd.concat(out, axis=1)
+def resample_and_interpol(df, freq = "2min"):
+
+    df1 = pd.DataFrame(
+        index = new_index(df, freq = freq)
+        )
+
+    chuck = pd.concat([df, df1], axis = 1
+                      ).interpolate()
+
+    return chuck.resample(freq).asfreq()
 
 
-def reindex_and_separe(df, Dir="zon"):
-    dn = df.index.date[0]
-    print("processing...", dn)
-    df.index = time2float(df.index.time, sum24=True)
-    return df[Dir].to_frame(name=dn)
-
-
-def get_monthly_mean(infile, Dir="zon", year=2013):
-
-    year = str(year)
-
-    out = []
-    for filename in os.listdir(infile):
-        path = os.path.join(infile, filename)
-        try:
-            df = concat_directions(fp.FabryPerot(path).wind)
-            if len(df) < 71:
-                out.append(reindex_and_separe(df, Dir=Dir))
-            else:
-                pass
-        except:
-            continue
-
-    df = pd.concat(out, axis=1)
-
-    name_to_save = f"{Dir}_{year}.txt"
-    save_in = os.path.join(infile, name_to_save)
-
-    df.to_csv(save_in, index=True)
-
+def load(infile):
+    
+    df = pd.read_csv(infile, index_col = 0)
+    df.index = pd.to_datetime(df.index)
     return df
+
+
+
+def process_day(
+        path, 
+        freq = "2min", 
+        parameter = "vnu"
+        ):
+
+    out = []
+    
+    for direction in ["zon", "mer"]:
+        
+        if parameter == "vnu":
+            data = fp.FPI(path).wind
+        else:
+            data = fp.FPI(path).temp
+            
+        df = split_directions(
+            data, 
+            direction = direction, 
+            parameter = parameter
+            )
+        
+        out.append(
+            resample_and_interpol(
+            df, freq = freq
+            ).rename(
+                columns = {parameter: direction})
+                )
+    
+                
+    return pd.concat(out, axis = 1)
+
+
+
+
+
+
+
