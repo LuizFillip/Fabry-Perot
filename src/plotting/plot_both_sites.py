@@ -148,18 +148,19 @@ def save_img(fig,
     plt.close()
     return 
 
+def main():
 
-for infiles in same_dates_in_sites(year = 2013):
-    f1, f2 = infiles
+    for infiles in same_dates_in_sites(year = 2013):
+        f1, f2 = infiles
+        
     
-    fig = plot_both_sites(f1, f2)
-    
-    
-    try:
-        FigureName = fp.date_from_filename(f1).strftime("%Y%m%d.png")
-        save_in = "D:\\plots2\\FPI\\"
-        print("saving...", FigureName)
-        save_img(fig, os.path.join(save_in, FigureName))
-    except:
-        continue
-    
+        try:
+            fig = plot_both_sites(f1, f2)
+            FigureName = fp.date_from_filename(
+                f1).strftime("%Y%m%d.png")
+            save_in = "D:\\plots2\\FPI\\"
+            print("saving...", FigureName)
+            save_img(fig, os.path.join(save_in, FigureName))
+        except:
+            continue
+        

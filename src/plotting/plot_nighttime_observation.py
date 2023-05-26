@@ -4,6 +4,17 @@ import os
 import settings as s
 
 
+# def running_avg(df, Dir, Type="vnu"):
+
+#     coords = {"zon": ("west", "east"), "mer": ("north", "south")}
+
+#     up, down = coords[Dir]
+
+#     ds = df.loc[(df["dir"] == up) | (df["dir"] == down), [Type]]
+
+#     return fp.resample_and_interpol(ds)[Type].to_frame(name=Dir)
+
+
 def plot_average(
         ax, df, di, 
         sample = "10min", 
@@ -42,12 +53,12 @@ def plot_directions(
     
     for i, coord in enumerate(coords.keys()):
         
-        plot_average(
-               ax[i], df, coord, 
-               sample = "10min", 
-               marker = "s",
-               color = "k"
-               )
+        # plot_average(
+        #        ax[i], df, coord, 
+        #        sample = "10min", 
+        #        marker = "s",
+        #        color = "k"
+        #        )
         for direction in coords[coord]:
             
             ds = df.loc[(df["dir"] == direction)]
@@ -88,7 +99,11 @@ def plot_nighttime_observation(
             day_locator = 1, 
             tz = "UTC"
             )
-
+    
+    if "car" in path:    
+        ax[0].set_title("Cariri")
+    else:
+        ax[0].set_title("Cajazeiras")
    
     return fig, ax 
         
@@ -100,8 +115,8 @@ def main():
     filename = files[2]
     path = os.path.join(infile, filename)
     path = 'database/FabryPerot/2012/minime01_car_20130502.cedar.005.txt'
-    #path = 'database/FabryPerot/caj/minime02_caj_20130502.cedar.001.hdf5.txt'
+    path = 'database/FabryPerot/caj/minime02_caj_20130415.cedar.004.hdf5.txt'
     plot_nighttime_observation(path)
 
-# main()
-
+main()
+# 
