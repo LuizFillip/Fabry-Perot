@@ -3,25 +3,11 @@ import os
 import FabryPerot as fp
 import settings as s
 import matplotlib.pyplot as plt
+import models as m
+from utils import translate
 
 
 
-
-def plot_average(
-        ax, df, di, 
-        sample = "10min", 
-        marker = "s",
-        color = "k"):
-    
-    args = dict(marker = marker,
-                lw = 2, 
-                fillstyle = "none")
-
-    avg30 = fp.running_avg(df, Dir = di)
-    
-    ax.plot(avg30, **args,
-            label = f"Média ({sample})")
-    
     
 
 
@@ -51,32 +37,43 @@ def plot_directions2(
     
     for i, coord in enumerate(coords.keys()):
         
-        plot_average(
-               ax[i, col], df, coord, 
-               sample = "10min", 
-               marker = "s",
-               color = "k"
-               )
+        ds = m.load_hwm(df, alt = 250, site = "car")
+       
+        ax[i, col].plot(ds[coord], lw = 2, label = "HWM-14 (250 km)")
+       
         for direction in coords[coord]:
             
             ds = df.loc[(df["dir"] == direction)]
-            
+            if direction == "east":
+                name = "Leste"
+            elif direction == "west":
+                name = "Oeste"
+            elif direction == "north":
+                name = "Norte"
+            else:
+                name = "Sul"
             ax[i, col].errorbar(
                 ds.index, 
                 ds[parameter], 
                 yerr = ds[f"d{parameter}"], 
-                label = direction
+                label = name, 
+                capsize = 5
                 )
-        ax[i, col].legend(loc = "upper right", ncol = 2)
-        ax[i, col].set(ylabel = f"Vento {names[i]} (m/s)", 
-                  ylim = [-200, 200])
-        ax[i, col].axhline(0, color = "k", linestyle = "--")
+        ax[i, col].legend(loc = "lower left", ncol = 3)
+        ax[i, col].set(
+            ylabel = f"Vento {names[i]} (m/s)", 
+            ylim = [-200, 200]
+            )
+        ax[i, col].axhline(0, color = "k", linestyle = "--")   
+        ax[i, 1].set(ylabel = "")
         
     s.format_time_axes(
             ax[1, col], hour_locator = 1, 
             day_locator = 1, 
             tz = "UTC"
             )
+    
+    return ax
 
 
 
@@ -101,7 +98,8 @@ def same_dates_in_sites(year = 2013):
             car_dt = get_datetime_fpi(f2)
             
             if ((car_dt == caj_dt) and 
-                (car_dt.year == 2013)):
+                (car_dt.year == 2013) and 
+                (car_dt.month == 3)):
                 car_infile = os.path.join(car, f2)
                 caj_infile = os.path.join(caj, f1)
                 
@@ -116,12 +114,14 @@ def plot_both_sites(f1, f2):
     fig, ax = plt.subplots(
         nrows = 2, 
         ncols= 2,
-        figsize = (12, 8), 
+        figsize = (18, 8), 
         sharex = True, 
         sharey = True, 
-        dpi = 300)
+        dpi = 300
+        )
 
-    plt.subplots_adjust(hspace = 0.05)
+    plt.subplots_adjust(hspace = 0.05, 
+                        wspace = 0.05)
 
     for col, path in enumerate([f1, f2]):
         plot_directions2(
@@ -130,7 +130,8 @@ def plot_both_sites(f1, f2):
                 col = col,
                 parameter = "vnu"
                 )
-
+    
+    s.config_labels(fontsize = 18)
     return fig 
 
 
@@ -163,4 +164,25 @@ def main():
             save_img(fig, os.path.join(save_in, FigureName))
         except:
             continue
-        
+
+# infiles = same_dates_in_sites(year = 2013)
+
+# infiles
+
+
+
+
+
+f1, f2 = ('database/FabryPerot/2012/minime01_car_20130317.cedar.005.txt',
+ 'database/FabryPerot/caj/minime02_caj_20130317.cedar.005.hdf5.txt')
+
+# f1, f2 = ('database/FabryPerot/2012/minime01_car_20130316.cedar.005.txt',
+#  'database/FabryPerot/caj/minime02_caj_20130316.cedar.005.hdf5.txt')
+
+# f1, f2 = ('database/FabryPerot/2012/minime01_car_20130319.cedar.005.txt',
+#  'database/FabryPerot/caj/minime02_caj_20130319.cedar.005.hdf5.txt')
+fig = plot_both_sites(f1, f2)
+
+FigureName = fp.date_from_filename(f1).strftime("%Y%m%d.png")
+
+fig.savefig("FabryPerot/figures/" + FigureName, dpi = 300)

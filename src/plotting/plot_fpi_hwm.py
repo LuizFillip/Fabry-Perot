@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May 26 10:04:23 2023
-
-@author: Luiz
-"""
 
 import matplotlib.pyplot as plt
 import settings as s

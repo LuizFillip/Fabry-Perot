@@ -9,7 +9,8 @@ def process_year(
         infile, 
         freq = "2min", 
         parameter = "vnu",
-        year = 2013, site = "car"
+        year = 2013, 
+        site = "car"
         ):
     
 
@@ -51,3 +52,5 @@ def main():
             parameter = "vnu",
             year = 2013
             )
+    
+main()

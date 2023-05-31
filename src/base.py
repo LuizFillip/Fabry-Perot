@@ -28,10 +28,7 @@ def split_directions(
         ds = df.loc[(df["dir"] == "north") | 
                     (df["dir"] == "south"), 
                     [parameter]]
-        
-        
     
-        
     return ds
  
 def new_index(df, freq = "2min"):
@@ -112,7 +109,9 @@ def process_day(
 
 
 
-
-
-
-
+def main():
+    path = 'database/FabryPerot/2012/minime01_car_20130316.cedar.005.txt'
+    
+    df = process_day(path).dropna()
+    
+    df.resample("10min").mean().plot()
