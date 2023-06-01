@@ -27,17 +27,10 @@ def plot_directions(
     names = ["zonal", "meridional"]
     
         
-    args = dict(marker = "s",
-                lw = 2, 
-                fillstyle = "none")
+
     
     for i, coord in enumerate(coords.keys()):
         
-        # mean = fp.process_day(path).resample("10min").mean()
-        
-        # ax[i].plot(mean[coord], **args, label = "Média (10 min)")
-        
-        # for alt in [250, 300, 350]:
         ds = m.load_hwm(df, alt = 250, site = "car")
         
         ax[i].plot(ds[coord], lw = 2, label = "HWM-14 (250 km)")
@@ -105,4 +98,4 @@ def main():
 
 
 
-# main()
+main()
