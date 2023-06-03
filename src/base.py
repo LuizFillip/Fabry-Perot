@@ -16,8 +16,7 @@ def split_directions(
         direction = "zon", 
         parameter = "vnu"
         ):
-      
-    df = df.loc[~((df["vnu"] > 300) | (df["vnu"] < -120))]
+         
     
     if direction == "zon":
         ds = df.loc[(df["dir"] == "east") | 
@@ -110,8 +109,18 @@ def process_day(
 
 
 def main():
-    path = 'database/FabryPerot/2012/minime01_car_20130316.cedar.005.txt'
+    out = []
+    for i in range(16, 20):
+        
+        path = f'database/FabryPerot/2012/minime01_car_201303{i}.cedar.005.txt'
+        
+        df = process_day(path, parameter = "tn").dropna()
+        
+        
+        df["avg"] = df.mean(axis = 1)
+        
+        out.append(df)
+        
+    ds = pd.concat(out)
     
-    df = process_day(path).dropna()
-    
-    df.resample("10min").mean().plot()
+    ds.to_csv("fp_temp.txt")
