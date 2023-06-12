@@ -111,7 +111,7 @@ class FPI(object):
             (df["dir"] == "south"), "vnu"
         ] = self.meridional(
             df["vnu"],
-                            df["elm"], df["azm"])
+            df["elm"], df["azm"])
 
         self.df = df
 

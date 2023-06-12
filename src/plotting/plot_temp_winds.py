@@ -19,7 +19,7 @@ def get_dn(wd):
 def plot_directions(
         ax, 
         path, 
-        ):
+        site = 'car'):
     
     wd = fp.FPI(path).wind
     tp = fp.FPI(path).temp
@@ -33,11 +33,11 @@ def plot_directions(
     for row, coord in enumerate(coords.keys()):
         
 
-        ds = m.load_hwm(wd, alt = 250, site = "caj")
+        ds = m.load_hwm(wd, alt = 300, site = site)
         
         ax[row, 0].plot(ds[coord], lw = 2, label = "HWM-14")
         
-        df = m.timerange_msis(get_dn(wd), site = "caj")
+        df = m.timerange_msis(get_dn(wd), site = site)
 
         ax[row, 1].plot(df["Tn"], lw = 2, label = "MSIS-00")
         
@@ -67,8 +67,9 @@ def plot_directions(
         ax[row, 1].legend(loc = "upper right", ncol = 1)
         
         
-        ax[row, 0].set(ylabel = "Velocidade (m/s)", 
-                  ylim = [-100, 150])
+        ax[row, 0].set(
+            ylabel = "Velocidade (m/s)", 
+            ylim = [-100, 150])
         
         ax[row, 1].set(ylabel = "Temperatura (K)", 
                   ylim = [600, 1200])
@@ -89,17 +90,17 @@ def plot_directions(
             0.02, 0.85, f"({letter}) {names[i].title()}", 
             transform = ax.transAxes
             )
+    return None
 
 
 def plot_nighttime_observation(
         path, 
-        parameter = "vnu"
         ):
     
     fig, ax = plt.subplots(
         nrows = 2, 
         ncols= 2,
-        figsize = (14, 8), 
+        figsize = (16, 10), 
         sharex = True, 
         dpi = 300
         )
@@ -109,12 +110,13 @@ def plot_nighttime_observation(
         hspace = 0.1
         )
     
-    plot_directions(ax, path)
-    
     if "car" in path:    
         title = "Cariri"
+        site = 'car'
     else:
         title = "Cajazeiras"
+        site = 'car'
+    plot_directions(ax, path, site = site)
         
     fig.suptitle(title)
     return fig
@@ -128,9 +130,45 @@ def main():
    
     fig = plot_nighttime_observation(path)
     
-    fig.savefig("FabryPerot/figures/CAJ20130317.png", dpi = 300)
+    
+def save_plots(files):
+    
+    save = 'D:\\plots\\caj\\'
+   
+    for filename in files:
+        FigureName = filename.split('.')[0].split('_')[-1] + '.png'
+        
+        try:
+            print(FigureName)
+            fig = plot_nighttime_observation(infile + filename)
+            fig.savefig(save + FigureName, dpi = 300)
+            
+        except:
+            continue
+        
+infile = "database/FabryPerot/caj/"
+
+files = os.listdir(infile)
+save = 'D:\\plots\\caj\\'
 
 
+def fn2dn(filename):
+    dn = filename.split('.')[0].split('_')[-1]
+    return dt.datetime.strptime(dn, '%Y%m%d')  
 
-# main()
-  
+for filename in files:
+    dn = fn2dn(filename)
+    
+    # if (dn.year == 2013) and (dn.month == 3):
+        # print(filename)
+        
+    FigureName = dn.strftime('%Y%m%d.png')
+    
+    plt.ioff()
+    
+    fig = plot_nighttime_observation(infile + filename)
+    
+    fig.savefig(save + FigureName, dpi = 300)
+    
+    plt.clf()   
+    plt.close()
