@@ -6,7 +6,8 @@ See (CEDAR Madrigal Database)[http://cedar.openmadrigal.org/] for more informati
 
 - Read file data and separe in differents positions in sky
 - Plotting and analysis themospheric temperature and winds
--  Data filtering/reduced
-
+- Compare parameters in two sites
+- Data filtering (data reduction)
+- Monthly average for each sky position 
 
 
