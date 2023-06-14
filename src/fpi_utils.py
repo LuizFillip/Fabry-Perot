@@ -19,7 +19,7 @@ def date_to_filename(year, month, day,
     return f"minime01_{site}_{dn}.cedar.{TYPE}.txt"
 
 
-def date_from_filename(filename):
+def fn2dn(filename):
     
     s = filename.split('_')
     obs_list = s[-1].split('.')

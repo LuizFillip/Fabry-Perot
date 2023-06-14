@@ -126,49 +126,38 @@ def main():
     
     path = 'database/FabryPerot/2012/minime01_car_20130318.cedar.005.txt'
     
-    path = "database/FabryPerot/caj/minime02_caj_20130317.cedar.005.hdf5.txt"
+    path = "database/FabryPerot/2013/minime01_car_20130909.cedar.006.txt"
    
     fig = plot_nighttime_observation(path)
     
     
-def save_plots(files):
+def save_plots():
     
-    save = 'D:\\plots\\caj\\'
-   
+    infile = "database/FabryPerot/2012/"
+
+    files = os.listdir(infile)
+    save = 'D:\\plots\\car\\'
+
+
+    def fn2dn(filename):
+        dn = filename.split('.')[0].split('_')[-1]
+        return dt.datetime.strptime(dn, '%Y%m%d')  
+
     for filename in files:
-        FigureName = filename.split('.')[0].split('_')[-1] + '.png'
+        dn = fn2dn(filename)
         
-        try:
-            print(FigureName)
-            fig = plot_nighttime_observation(infile + filename)
-            fig.savefig(save + FigureName, dpi = 300)
+        # if (dn.year == 2013) and (dn.month == 3):
+            # print(filename)
             
-        except:
-            continue
+        FigureName = dn.strftime('%Y%m%d.png')
         
-infile = "database/FabryPerot/caj/"
-
-files = os.listdir(infile)
-save = 'D:\\plots\\caj\\'
-
-
-def fn2dn(filename):
-    dn = filename.split('.')[0].split('_')[-1]
-    return dt.datetime.strptime(dn, '%Y%m%d')  
-
-for filename in files:
-    dn = fn2dn(filename)
-    
-    # if (dn.year == 2013) and (dn.month == 3):
-        # print(filename)
+        plt.ioff()
+        print(dn)
+        fig = plot_nighttime_observation(infile + filename)
         
-    FigureName = dn.strftime('%Y%m%d.png')
-    
-    plt.ioff()
-    
-    fig = plot_nighttime_observation(infile + filename)
-    
-    fig.savefig(save + FigureName, dpi = 300)
-    
-    plt.clf()   
-    plt.close()
+        fig.savefig(save + FigureName, dpi = 300)
+        
+        plt.clf()   
+        plt.close()
+        
+# save_plots()

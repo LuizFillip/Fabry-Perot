@@ -67,19 +67,16 @@ def resample_and_interpol(df, freq = "2min"):
     return chuck.resample(freq).asfreq()
 
 
-def load(infile):
-    
-    df = pd.read_csv(infile, index_col = 0)
-    df.index = pd.to_datetime(df.index)
-    return df
 
-
-
-def process_day(
+def process_directions(
         path, 
         freq = "2min", 
         parameter = "vnu"
         ):
+    
+    """Return zonal and meridonal by
+    running avg
+    """
 
     out = []
     
@@ -108,19 +105,5 @@ def process_day(
 
 
 
-def main():
-    out = []
-    for i in range(16, 20):
-        
-        path = f'database/FabryPerot/2012/minime01_car_201303{i}.cedar.005.txt'
-        
-        df = process_day(path, parameter = "tn").dropna()
-        
-        
-        df["avg"] = df.mean(axis = 1)
-        
-        out.append(df)
-        
-    ds = pd.concat(out)
+
     
-    ds.to_csv("fp_temp.txt")
