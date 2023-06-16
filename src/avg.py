@@ -44,7 +44,7 @@ for filename in files:
         
         df = fp.FPI(infile + filename).wind
         
-        df = df.loc[~(df['vnu'] > 200)]
+        df = df.loc[~((df['vnu'] < -200) | (df['vnu'] > 200))]
         for seq in ['west', 'east', 'south', 'north']:
             try:
                 ts = sep_direction_(df, seq)
@@ -66,10 +66,9 @@ fig, ax = plt.subplots(
 def plot_coord(ax, south
                ):
     ds = pd.concat(south, axis = 1)
+    ax.plot(ds, color = 'gray', alpha = 0.3)
+    ax.plot(ds.mean(axis = 1), color = 'k')
     
-    ax.plot(ds, color = 'gray')
-    
-    # dn = pd.to_datetime('2013-03-17').date()
-    # ax.plot(ds[dn], color = 'r')
+    ax.plot(ds['2013-03-16'], color = 'r')
 plot_coord(ax[0], south)
 plot_coord(ax[1], north)
