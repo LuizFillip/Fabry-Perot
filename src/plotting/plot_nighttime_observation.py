@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import FabryPerot as fp
 import os
 import settings as s
-import pandas as pd
 import models as m
 
 
