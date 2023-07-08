@@ -33,13 +33,13 @@ def plot_directions(
     for row, coord in enumerate(coords.keys()):
         
 
-        ds = m.load_hwm(wd, alt = 300, site = site)
+        # ds = m.load_hwm(wd, alt = 300, site = site)
         
-        ax[row, 0].plot(ds[coord], lw = 2, label = "HWM-14")
+        # ax[row, 0].plot(ds[coord], lw = 2, label = "HWM-14")
         
-        df = m.timerange_msis(get_dn(wd), site = site)
+        # df = m.timerange_msis(get_dn(wd), site = site)
 
-        ax[row, 1].plot(df["Tn"], lw = 2, label = "MSIS-00")
+        # ax[row, 1].plot(df["Tn"], lw = 2, label = "MSIS-00")
         
         for direction in coords[coord]:
             
@@ -126,7 +126,7 @@ def main():
     
     path = 'database/FabryPerot/2012/minime01_car_20130318.cedar.005.txt'
     
-    path = "database/FabryPerot/2013/minime01_car_20130909.cedar.006.txt"
+    path = "database/FabryPerot/car/minime01_car_20130909.cedar.006.txt"
    
     fig = plot_nighttime_observation(path)
     
@@ -160,4 +160,4 @@ def save_plots():
         plt.clf()   
         plt.close()
         
-# save_plots()
+# main()

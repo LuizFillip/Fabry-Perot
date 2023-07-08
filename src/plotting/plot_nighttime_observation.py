@@ -1,10 +1,7 @@
 import matplotlib.pyplot as plt
 import FabryPerot as fp
-import os
 import settings as s
 import models as m
-
-
 
 
 def plot_directions(
@@ -17,7 +14,7 @@ def plot_directions(
         df = fp.FPI(path).wind
     else:
         df = fp.FPI(path).temp
-        
+                
     coords = {
         "zon": ("east", "west"), 
         "mer": ("north", "south")
@@ -25,9 +22,7 @@ def plot_directions(
     
     names = ["zonal", "meridional"]
     
-        
 
-    
     for i, coord in enumerate(coords.keys()):
         
         ds = m.load_hwm(df, alt = 250, site = "car")
@@ -46,8 +41,8 @@ def plot_directions(
                 capsize = 5
                 )
         ax[i].legend(loc = "lower left", ncol = 3)
-        ax[i].set(ylabel = f"Vento {names[i]} (m/s)", 
-                  ylim = [-200, 200])
+        ax[i].set(ylabel = f"{names[i]} wind (m/s)", 
+                  ylim = [-100, 200])
         ax[i].axhline(0, color = "k", linestyle = "--")
 
 
@@ -58,11 +53,13 @@ def plot_nighttime_observation(
         parameter = "vnu"
         ):
     
-    fig, ax = plt.subplots(nrows = 2, 
-                           figsize = (10, 8), 
-                           sharex = True, 
-                           sharey = True, 
-                           dpi = 300)
+    fig, ax = plt.subplots(
+        nrows = 2, 
+        figsize = (10, 8), 
+        sharex = True, 
+        sharey = True, 
+        dpi = 300
+        )
     
     plt.subplots_adjust(hspace = 0.1)
     
@@ -70,7 +67,8 @@ def plot_nighttime_observation(
     plot_directions(ax, path, parameter = parameter)
     
     s.format_time_axes(
-            ax[1], hour_locator = 1, 
+            ax[1], 
+            hour_locator = 1, 
             day_locator = 1, 
             tz = "UTC"
             )
@@ -84,17 +82,14 @@ def plot_nighttime_observation(
         
 def main():
     
-    infile = "database/FabryPerot/2013/"
-    files = os.listdir(infile)
-
-    filename = files[2]
-    path = os.path.join(infile, filename)
-    path = 'database/FabryPerot/2012/minime01_car_20130318.cedar.005.txt'
-    #path = 'database/FabryPerot/caj/minime02_caj_20130415.cedar.004.hdf5.txt'
+ 
+    path = 'database/FabryPerot/car/minime01_car_20130216.cedar.005.txt'
+    #path = 'database/FabryPerot/caj/minime02_caj_20121216.cedar.005.txt'
     fig = plot_nighttime_observation(path)
     
-    fig.savefig("FabryPerot/figures/20130318.png", dpi = 300)
+    # fig.savefig("FabryPerot/figures/20130318.png", dpi = 300)
 
 
 
-# main()
+main()
+plt.show()

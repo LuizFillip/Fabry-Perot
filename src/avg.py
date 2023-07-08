@@ -24,21 +24,15 @@ def fn2dn(filename):
     return dt.datetime.strptime(dn, '%Y%m%d')  
 
         
-        
-
-
-
 
 def interpol_directions(infile):
     
     files = os.listdir(infile)
 
-
+    out_days = []
     for filename in files:
         dn  = fn2dn(filename)
     
-        out_days = []
-        
         if (dn.year == 2013):
             
             df = fp.FPI(infile + filename).wind
@@ -47,21 +41,25 @@ def interpol_directions(infile):
                           (df['vnu'] > 200))]
             
             out_dir =  []
-            print(dn)
-            for seq in ['west', 'east', 
-                        'south', 'north']:
-                ts = sep_direction_(df, seq)
-                
-                out_dir.append(ts.to_frame(seq))
-              
-            out_days.append(pd.concat(
-                out_dir, axis = 1)
+            
+            try:
+                for seq in ['west', 'east', 
+                            'south', 'north']:
+                    ts = sep_direction_(df, seq)
+                    
+                    out_dir.append(ts.to_frame(seq))
+                  
+            except:
+                continue
+            
+            out_days.append(
+                pd.concat(out_dir, axis = 1)
                 )
-        
-    return pd.concat(out_days)
+    return pd.concat(out_days).sort_index()
 
-infile = 'database/FabryPerot/car/'
-
-ds = interpol_directions(infile)
-
-ds.to_csv('database/FabryPerot/car_interpol_2013.txt')
+def main():
+    infile = 'database/FabryPerot/caj/'
+    
+    ds = interpol_directions(infile)
+    
+    # ds.to_csv()
