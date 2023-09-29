@@ -72,17 +72,27 @@ class FPI(object):
             "INB",
         ]
 
-        df["dir"] = np.select(conditions, names, default=np.nan)
+        df["dir"] = np.select(
+            conditions, 
+            names,
+            default = np.nan
+            )
 
-        names = ["year", "month", "day", "hour", "minute", "second"]
+        names = ["year", "month", "day", 
+                 "hour", "minute", "second"]
 
         for num, elem in enumerate(df.columns):
             if num < 6:
-                df.rename(columns={elem: names[num]}, inplace=True)
+                df.rename(
+                    columns={elem: 
+                             names[num]}, inplace=True)
             else:
-                df.rename(columns={elem: elem.lower()}, inplace=True)
+                df.rename(
+                    columns={elem: 
+                             elem.lower()}, inplace=True)
 
-        df.index = pd.to_datetime(df[names], infer_datetime_format=True)
+        df.index = pd.to_datetime(
+            df[names], infer_datetime_format=True)
 
         other_cols = [
             "recno",
