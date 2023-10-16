@@ -4,8 +4,7 @@ from astropy.timeseries import LombScargle
 from scipy.signal import find_peaks
 
 
-path = 'database/FabryPerot/cariri/2013/'
-fname = 'minime01_car_20130101.cedar.005.txt'
+
 
 
 
@@ -64,7 +63,9 @@ def list_cond(p1, p2, p3, p4):
 
     return [t for t in diff_list if t <= 0.15]
     
-def check_similiarities(out):
+def check_similiarities(infile, col = 'tn'):
+    
+    out = peaks_periods(infile, col)
 
     dic = []
                 
@@ -77,12 +78,35 @@ def check_similiarities(out):
                         
                         dic.append([p1, p2, p3, p4])
        
-    index = len(dic)
+    index = len(dic) * [fp.fn2dn(infile)]
     return pd.DataFrame(
-        dic, columns = list(out.keys())
+        dic, columns = list(out.keys()), 
+        index = index
         )
 
-infile = path + fname
-out = peaks_periods(infile, col = 'tn')
 
-df = check_similiarities(out)
+path = 'database/FabryPerot/cariri/2013/'
+# fname = 'minime01_car_20130101.cedar.005.txt'
+from tqdm import tqdm 
+import os
+
+def run():
+
+    out = []
+    
+    for fname in tqdm(os.listdir(path)):
+        
+        infile = os.path.join(
+            path, fname)
+        try:
+           out.append(
+               check_similiarities(
+                   infile, col = 'tn')
+               )
+        except:
+            continue
+        
+    return pd.concat(out)
+
+df = run()
+

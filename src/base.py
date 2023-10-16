@@ -106,4 +106,3 @@ def process_directions(
 
 
 
-    

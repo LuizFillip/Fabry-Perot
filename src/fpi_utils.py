@@ -1,15 +1,5 @@
-import os
 import datetime as dt
-
-def get_endswith_extension(infile, 
-                           extention = ".txt"):
-    _, _, files = next(os.walk(infile))
-    txt_files = []
-    for filename in files:
-        if filename.endswith(extention):
-            txt_files.append(filename)
-    
-    return txt_files
+import os
 
 def date_to_filename(year, month, day, 
                      TYPE = "004", 
@@ -21,13 +11,17 @@ def date_to_filename(year, month, day,
 
 def fn2dn(filename):
     
-    s = filename.split('_')
-    obs_list = s[-1].split('.')
+    try:
     
-    # self.intr = s[0]
-    # self.site = s[1]
-    # self.number = obs_list[1]
-    
-    date_str = obs_list[0]
-    return dt.datetime.strptime(date_str, "%Y%m%d").date()
+        s = filename.split('_')
+        obs_list = s[-1].split('.')
+        date_str = obs_list[0]
+        
+    except:
+        p = os.path.split(filename)[-1]
+        s = p.split('_')
+        obs_list = s[-1].split('.')
+        date_str = obs_list[0]
+        
+    return dt.datetime.strptime(date_str, "%Y%m%d")
     
