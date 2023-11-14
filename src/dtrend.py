@@ -2,11 +2,33 @@ import pandas as pd
 import FabryPerot as fp
 from astropy.timeseries import LombScargle
 from scipy.signal import find_peaks
+from tqdm import tqdm 
+import os
 
+def dtrend_(ds):
 
+    avg = ds.rolling('1H').mean(center = True)
+    
+    ds['dtrend'] = ds - avg
+    
+    y = ds['dtrend'].values
+    t = ds['time'].values 
+    
+    return y, t
 
-
-
+def LS(t, y):
+    
+    ls = LombScargle(t, y)
+    
+    frequency, power = ls.autopower(
+            minimum_frequency = 1 / 5,
+            maximum_frequency = 1 / 1.1,
+            samples_per_peak = 100
+            )
+        
+    period = 1 / frequency
+    
+    return period, power
 
 def peaks_periods(infile, col = 'tn'):
     
@@ -15,33 +37,24 @@ def peaks_periods(infile, col = 'tn'):
     else:
         df = fp.FPI(infile).temp
         
-    out = {'south' : [], 'north': [], 
-           'east': [], 'west': []}
+    out = {
+        'south' : [], 
+        'north': [], 
+        'east': [], 
+        'west': []
+        }
     
     
     for j, sector in enumerate(out.keys()):
         
         ds = df.loc[df['dir'] == sector]
         
-        avg = ds[col].rolling('1H').mean(center = True)
+        t, y = dtrend_(ds[col])
         
-        ds['dtrend'] = ds[col] - avg
-        
-        y = ds['dtrend'].values
-        t = ds['time'].values 
-        
-        ls = LombScargle(t, y)
-        
-        frequency, power = ls.autopower(
-                minimum_frequency = 1 / 5,
-                maximum_frequency = 1 / 1.1,
-                samples_per_peak = 100
-                )
-            
-        period = 1 / frequency
+        period, power = LS(t, y)
         
         points = find_peaks(power, height = 0.01)
-        
+            
         for i in points[0]:
             out[sector].append(period[i])
     
@@ -52,7 +65,10 @@ def peaks_periods(infile, col = 'tn'):
 def diff_values(valor1, valor2):  
     return abs(valor1 - valor2)
 
-def list_cond(p1, p2, p3, p4):
+def list_cond(
+        p1, p2, p3, p4, 
+        threshold = 0.1
+        ):
     
     diff_list = [
         diff_values(p1, p2),
@@ -61,7 +77,7 @@ def list_cond(p1, p2, p3, p4):
         diff_values(p3, p4)
         ]
 
-    return [t for t in diff_list if t <= 0.15]
+    return [t for t in diff_list if t <= threshold]
     
 def check_similiarities(infile, col = 'tn'):
     
@@ -79,34 +95,41 @@ def check_similiarities(infile, col = 'tn'):
                         dic.append([p1, p2, p3, p4])
        
     index = len(dic) * [fp.fn2dn(infile)]
+    
     return pd.DataFrame(
         dic, columns = list(out.keys()), 
         index = index
         )
 
 
-path = 'database/FabryPerot/cariri/2013/'
-# fname = 'minime01_car_20130101.cedar.005.txt'
-from tqdm import tqdm 
-import os
 
-def run():
+def run(path, col = 'tn'):
 
     out = []
     
-    for fname in tqdm(os.listdir(path)):
+    for fname in tqdm(os.listdir(path), col):
         
         infile = os.path.join(
             path, fname)
         try:
            out.append(
                check_similiarities(
-                   infile, col = 'tn')
+                   infile, 
+                   col
+                   )
                )
         except:
             continue
         
-    return pd.concat(out)
+    return pd.concat(out).sort_index()
 
-df = run()
-
+def main():
+    path = 'database/FabryPerot/cariri/2013/'
+    
+    col = 'vnu'
+    df = run(path, col)
+    
+    save_in = f'FabryPerot/data/periods/2013_{col}.txt'
+    df.to_csv(save_in)
+    
+    df
