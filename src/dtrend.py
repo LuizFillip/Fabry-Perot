@@ -123,13 +123,3 @@ def run(path, col = 'tn'):
         
     return pd.concat(out).sort_index()
 
-def main():
-    path = 'database/FabryPerot/cariri/2013/'
-    
-    col = 'vnu'
-    df = run(path, col)
-    
-    save_in = f'FabryPerot/data/periods/2013_{col}.txt'
-    df.to_csv(save_in)
-    
-    df
