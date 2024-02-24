@@ -1,65 +1,57 @@
 import FabryPerot as fp
 import pandas as pd
 import datetime as dt
-from utils import time2float
 import os 
+import base as b
 
+
+
+DIRECTIONS = ['west', 'east', 'south', 'north']
 
 def sep_direction_(df, seq, reindex = False):
 
     ds = df.loc[df['dir'] == seq, 
                 ['vnu', 'dvnu', 'time']]
     
-    ts = fp.resample_and_interpol(
-        ds, freq = '5min')['vnu']
+    ts = fp.resample_and_interpol(ds, freq = '10min')['vnu']
     
     if reindex:
-        ts.index = time2float(
-            ts.index, sum24_from = 20)
+        ts.index = b.time2float(ts.index, sum24_from = 20)
     
     return ts
 
-def fn2dn(filename):
-    dn = filename.split('.')[0].split('_')[-1]
-    return dt.datetime.strptime(dn, '%Y%m%d')  
-
-        
 
 def interpol_directions(infile):
-    
-    files = os.listdir(infile)
+        
+    df = fp.FPI(infile).wind
 
-    out_days = []
-    for filename in files:
-        dn  = fn2dn(filename)
+    out =  []
+    df = df.loc[~((df['vnu'] > 300) | (df['vnu'] < -300))]
+    for seq in DIRECTIONS:
+        try:
+            ts = sep_direction_(df, seq)
+            
+            out.append(ts.to_frame(seq))
+      
+        except:
+            continue
+        
+    return pd.concat(out, axis = 1)
+        
+def join_days(infile):
     
-        if (dn.year == 2013):
-            
-            df = fp.FPI(infile + filename).wind
-            
-            df = df.loc[~((df['vnu'] < -200) | 
-                          (df['vnu'] > 200))]
-            
-            out_dir =  []
-            
-            try:
-                for seq in ['west', 'east', 
-                            'south', 'north']:
-                    ts = sep_direction_(df, seq)
-                    
-                    out_dir.append(ts.to_frame(seq))
-                  
-            except:
-                continue
-            
-            out_days.append(
-                pd.concat(out_dir, axis = 1)
-                )
-    return pd.concat(out_days).sort_index()
+    out = []
+    for filename in os.listdir(infile):
+    
+        out.append(interpol_directions(infile + filename))
+        
+    df = pd.concat(out).sort_index()
+    
+    df['time'] = df.index.to_series().apply(b.dn2float)
+    df['day'] = df.index.day
+    df = df.loc[~df.index.duplicated()]
+    return df
 
-def main():
-    infile = 'database/FabryPerot/caj/'
-    
-    ds = interpol_directions(infile)
-    
-    # ds.to_csv()
+
+
+
