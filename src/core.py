@@ -80,6 +80,12 @@ class FPI(object):
 
         names = ["year", "month", "day", 
                  "hour", "minute", "second"]
+        
+        if 'vnu' not in df.columns:
+            df = df.rename(
+                columns = {'VNHLU': 'vnu', 
+                           'DVNHLU': 'dvnu'}
+                )
 
         for num, elem in enumerate(df.columns):
             if num < 6:
@@ -94,22 +100,24 @@ class FPI(object):
         df.index = pd.to_datetime(
             df[names], infer_datetime_format=True)
 
-        other_cols = [
-            "recno",
-            "kindat",
-            "kinst",
-            "gdalt",
-            "dgdalt",
-            "ut1_unix",
-            "ut2_unix",
-            "wavlen",
-            "rlel",
-            "drlel",
-            "doppl_ref",
-        ]
+        # other_cols = [
+        #     "recno",
+        #     "kindat",
+        #     "kinst",
+        #     "gdalt",
+        #     "dgdalt",
+        #     "ut1_unix",
+        #     "ut2_unix",
+        #     "wavlen",
+        #     "rlel",
+        #     "drlel",
+        #     "doppl_ref",
+        # ]
 
-        df = df.drop(names + other_cols, axis=1)
-
+        # df = df.drop(names + other_cols, axis=1)
+        
+            
+        
         df.loc[
             (df["dir"] == "east") | 
             (df["dir"] == "west"), "vnu"] = self.zonal(
@@ -119,10 +127,9 @@ class FPI(object):
         df.loc[
             (df["dir"] == "north") |
             (df["dir"] == "south"), "vnu"
-        ] = self.meridional(
-            df["vnu"],
-            df["elm"], df["azm"])
-
+        ] = self.meridional(df["vnu"], df["elm"], df["azm"])
+        
+        
         self.df = df
 
     @staticmethod
@@ -175,3 +182,10 @@ def load_FPI(
     ]
     return df
 
+# infile = 'FabryPerot/data/FPI/bfp220303g.7100.txt'
+
+# df = FPI(infile).wind
+
+# for col in df['dir'].unique():
+    
+#     df.loc[df['dir'] == col, ['vnu']].plot()
