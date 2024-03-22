@@ -1,6 +1,5 @@
 import FabryPerot as fp
 import pandas as pd
-import datetime as dt
 import os 
 import base as b
 
