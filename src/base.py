@@ -61,8 +61,7 @@ def resample_and_interpol(df, freq = "2min"):
         index = new_index(df, freq = freq)
         )
 
-    chuck = pd.concat([df, df1], axis = 1
-                      ).interpolate()
+    chuck = pd.concat([df, df1], axis = 1).interpolate()
 
     return chuck.resample(freq).asfreq()
 

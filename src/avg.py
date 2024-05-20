@@ -8,10 +8,27 @@ import datetime as dt
 
 DIRECTIONS = ['west', 'east', 'south', 'north']
 
+def resample_new_index(ds, freq = '10min'):
+    
+    times = ds.index
+    
+    start = times[0].replace(minute = 0, second = 0) 
+    end = times[-1] #.replace(minute = 0, second = 0) 
+    
+    df1 = pd.DataFrame(
+        index = pd.date_range(start, end, freq = freq)
+        )
+    
+    df = pd.concat([ds, df1], axis = 1).interpolate()
+    
+    df['time2'] = b.time2float(df.index, sum_from = 20)
+    
+    return df.resample(freq).asfreq()
+
+
 def sep_direction_(
         df, seq, 
-        parameter = 'vnu', 
-        reindex = False
+        parameter = 'vnu'
         ):
     
     if parameter == 'vnu':
@@ -25,13 +42,7 @@ def sep_direction_(
                 
     ds = df.loc[df['dir'] == seq, cols]
     
-    ts = fp.resample_and_interpol(ds, freq = '10min')[parameter]
-    
-    if reindex:
-        ts.index = b.time2float(ts.index, sum_from = 20)
-    
-    return ts
-
+    return resample_new_index(ds, freq = '10min')[parameter]
 
 def interpol_directions(
         infile, 
@@ -69,27 +80,6 @@ def interpol_directions(
     return pd.concat(out, axis = 1)
 
 
-def resample_new_index(ds, freq = '10min'):
-    
-    times = ds.index
-    
-    start = times[0].replace(minute = 0, second = 0) 
-    end = times[-1].replace(minute = 0, second = 0) 
-    
-    df1 = pd.DataFrame(
-        index = pd.date_range(start, end, freq = freq)
-        )
-    
-    df = pd.concat([ds, df1], axis = 1).interpolate()
-    
-    df['time2'] = b.time2float(df.index, sum_from = 20)
-    
-    return df.resample(freq).asfreq()
-
-
-
-
-
         
 def join_days(ref_date, in_month = True, parameter = 'tn'):
     
@@ -97,10 +87,10 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
     
     if in_month:
         
-        files = file_of_the_month(ref_date, infile)
+        files = fp.file_of_the_month(ref_date, infile)
     else:
         
-        files = get_window_of_dates(ref_date)
+        files =  fp.get_window_of_dates(ref_date)
 
 
     out = []
@@ -123,15 +113,8 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
 
 # dn = dt.datetime(2022, 7, 24)
 # infile = 'database/FabryPerot/cj/'
-dn = dt.datetime(2022, 7, 24, 21)
-infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
+# dn = dt.datetime(2022, 7, 24, 21)
+# infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
  
-df = fp.FPI(infile).bright
 
-seq = 'west'
-# ts = sep_direction_(df, seq, parameter = 'rle')
-
-ds = df.loc[df['dir'] == seq]
-
-
-resample_new_index(ds)
+# join_days(dn, in_month = True, parameter = 'tn')
