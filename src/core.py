@@ -83,40 +83,20 @@ class FPI(object):
         
         if 'vnu' not in df.columns:
             df = df.rename(
-                columns = {'VNHLU': 'vnu', 
-                           'DVNHLU': 'dvnu'}
+                columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu'}
                 )
 
         for num, elem in enumerate(df.columns):
             if num < 6:
                 df.rename(
-                    columns={elem: 
-                             names[num]}, inplace=True)
+                    columns={elem: names[num]}, inplace=True)
             else:
                 df.rename(
-                    columns={elem: 
-                             elem.lower()}, inplace=True)
+                    columns={elem: elem.lower()}, inplace=True)
 
         df.index = pd.to_datetime(
             df[names], infer_datetime_format=True)
 
-        # other_cols = [
-        #     "recno",
-        #     "kindat",
-        #     "kinst",
-        #     "gdalt",
-        #     "dgdalt",
-        #     "ut1_unix",
-        #     "ut2_unix",
-        #     "wavlen",
-        #     "rlel",
-        #     "drlel",
-        #     "doppl_ref",
-        # ]
-
-        # df = df.drop(names + other_cols, axis=1)
-        
-            
         
         df.loc[
             (df["dir"] == "east") | 
@@ -151,6 +131,10 @@ class FPI(object):
     @property
     def wind(self):
         return self.df.loc[:, ["vnu", "dvnu", "dir", "time"]]
+    
+    @property
+    def bright(self):
+        return self.df.loc[:, ["rle", "drle", "dir", "time"]]
 
 
 
@@ -182,10 +166,12 @@ def load_FPI(
     ]
     return df
 
-# infile = 'FabryPerot/data/FPI/bfp220303g.7100.txt'
 
-# df = FPI(infile).wind
-
-# for col in df['dir'].unique():
+def main():
+    infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
     
-#     df.loc[df['dir'] == col, ['vnu']].plot()
+    df = FPI(infile).bright
+    
+    for d in df['dir'].unique():
+        df.loc[df['dir'] == d]['rle'].plot(label = d)
+    
