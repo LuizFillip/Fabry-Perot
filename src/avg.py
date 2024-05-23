@@ -2,8 +2,6 @@ import FabryPerot as fp
 import pandas as pd
 import os 
 import base as b
-import datetime as dt 
-
 
 
 DIRECTIONS = ['west', 'east', 'south', 'north']
@@ -26,10 +24,7 @@ def resample_new_index(ds, freq = '10min'):
     return df.resample(freq).asfreq()
 
 
-def sep_direction_(
-        df, seq, 
-        parameter = 'vnu'
-        ):
+def sep_direction_(df, seq,  parameter = 'vnu'):
     
     if parameter == 'vnu':
         cols = ['vnu', 'dvnu', 'time']
@@ -86,10 +81,8 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
     infile = 'database/FabryPerot/cj/'
     
     if in_month:
-        
         files = fp.file_of_the_month(ref_date, infile)
     else:
-        
         files =  fp.get_window_of_dates(ref_date)
 
 
