@@ -3,7 +3,6 @@ import os
 import pandas as pd 
 
 def dn_to_filename(dn, site = 'bfp', code = 7100):
-    
     fmt = f'{site}%y%m%dg.{code}.txt'
     return dn.strftime(fmt)
 
