@@ -93,10 +93,16 @@ class FPI(object):
         names = ["year", "month", "day", 
                  "hour", "minute", "second"]
         
-        if 'vnu' not in df.columns:
-            df = df.rename(
-                columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu'}
-                )
+        # if 'vnu' not in df.columns:
+        #     df = df.rename(
+        #         columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu'}
+        #         )
+            
+        df.rename(
+            columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu', 
+                       'RLEL': 'rle', 'DRLEL': 'drle'},
+            inplace = True
+            )
 
         for num, elem in enumerate(df.columns):
             if num < 6:
@@ -196,4 +202,5 @@ def main():
 # infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
 
 # df = FPI(infile).bright
+
 

@@ -22,9 +22,13 @@ def file_of_the_month(dn, infile):
     return out
 
 
-def date_to_filename(year, month, day, 
-                     TYPE = "004", 
-                     site = "car"):
+def date_to_filename(
+        year, 
+        month, 
+        day, 
+        TYPE = "004", 
+        site = "car"
+        ):
 
     dn = dt.date(year, month, day).strftime("%Y%m%d")
     return f"minime01_{site}_{dn}.cedar.{TYPE}.txt"
