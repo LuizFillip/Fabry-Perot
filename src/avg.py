@@ -18,9 +18,7 @@ def resample_new_index(ds, freq = '10min'):
         )
     
     df = pd.concat([ds, df1], axis = 1).interpolate()
-    
-    df['time2'] = b.time2float(df.index, sum_from = 20)
-    
+        
     return df.resample(freq).asfreq()
 
 
@@ -40,7 +38,25 @@ def sep_direction_(df, seq,  parameter = 'vnu'):
     return resample_new_index(ds, freq = '10min')[parameter]
 
 def interpol_directions(
-        infile, 
+        df, 
+        parameter = 'vnu'
+        ):
+    
+    out =  []
+    for seq in DIRECTIONS:
+        # try:
+        ts = sep_direction_(df, seq, parameter = parameter)
+        
+        out.append(ts.to_frame(seq))
+      
+        # except:
+        #     continue
+        
+    return pd.concat(out, axis = 1)
+
+
+def interpol_by_dataframe(
+        infile,
         parameter = 'vnu',
         wind_threshold = 300, 
         temp_threshold = 1500
@@ -61,18 +77,8 @@ def interpol_directions(
         
     else:
         df = fp.FPI(infile).temp  
-        
-    out =  []
-    for seq in DIRECTIONS:
-        try:
-            ts = sep_direction_(df, seq, parameter = parameter)
-            
-            out.append(ts.to_frame(seq))
-      
-        except:
-            continue
-        
-    return pd.concat(out, axis = 1)
+    
+    return df
 
 
         

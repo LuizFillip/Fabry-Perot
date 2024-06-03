@@ -92,11 +92,7 @@ class FPI(object):
 
         names = ["year", "month", "day", 
                  "hour", "minute", "second"]
-        
-        # if 'vnu' not in df.columns:
-        #     df = df.rename(
-        #         columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu'}
-        #         )
+    
             
         df.rename(
             columns = {'VNHLU': 'vnu','DVNHLU': 'dvnu', 
@@ -146,6 +142,7 @@ class FPI(object):
 
     @property
     def wind(self):
+        
         return self.df.loc[:, ["vnu", "dvnu", "dir", "time"]]
     
     @property
