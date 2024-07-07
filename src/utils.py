@@ -6,9 +6,9 @@ def dn_to_filename(dn, site = 'bfp', code = 7100):
     fmt = f'{site}%y%m%dg.{code}.txt'
     return dn.strftime(fmt)
 
-def filename_to_dn(file, site = 'bfp', code = 7100):
-    fmt = f'{site}%y%m%dg.{code}.txt'
-    return dt.datetime.strptime(file, fmt)
+# def fn2dn(file, site = 'bfp', code = 7100):
+#     fmt = f'{site}%y%m%dg.{code}.txt'
+#     return dt.datetime.strptime(file, fmt)
 
 def file_of_the_month(dn, infile):
     files = os.listdir(infile)
@@ -62,3 +62,5 @@ def get_window_of_dates(dn, site = 'bfp', code = 7100):
             )
     
     return out
+
+
