@@ -39,8 +39,15 @@ def sep_direction_(df, seq,  parameter = 'vnu'):
 
 def interpol_directions(
         df, 
-        parameter = 'vnu'
-        ):
+        parameter = 'vnu',
+        wind_threshold = 400):
+    
+    if parameter == 'vnu':
+        
+        df = df.loc[~(
+            (df['vnu'] > wind_threshold) | 
+            (df['vnu'] < -wind_threshold))
+            ]
     
     out =  []
     for seq in DIRECTIONS:
@@ -49,36 +56,8 @@ def interpol_directions(
         
         out.append(ts.to_frame(seq))
       
-        # except:
-        #     continue
-        
     return pd.concat(out, axis = 1)
 
-
-def interpol_by_dataframe(
-        infile,
-        parameter = 'vnu',
-        wind_threshold = 300, 
-        temp_threshold = 1500
-        ):
-    
-    if parameter == 'vnu':
-        df = fp.FPI(infile).wind
-    
-        
-        df = df.loc[~(
-            (df['vnu'] > wind_threshold) | 
-            (df['vnu'] < -wind_threshold))
-            ]
-        
-    elif parameter == 'rle':
-        
-        df = fp.FPI(infile).bright
-        
-    else:
-        df = fp.FPI(infile).temp  
-    
-    return df
 
 
         
@@ -106,14 +85,29 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
 
 
 
-# 
+def join_days1():
+    infile = 'database/FabryPerot/car/'
 
-# files = os.listdir(infile)
+    files = os.listdir(infile)
 
-# dn = dt.datetime(2022, 7, 24)
-# infile = 'database/FabryPerot/cj/'
-# dn = dt.datetime(2022, 7, 24, 21)
-# infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
- 
+    out = []
 
-# join_days(dn, in_month = True, parameter = 'tn')
+    for file in files:
+        df1 = fp.FPI(infile + file).wind
+        # try:
+        out.append(
+            interpol_directions(df1, parameter = 'vnu'))
+        # except:
+        #     continue 
+        
+    df = pd.concat(out)
+
+    df['doy'] = df.index.day_of_year
+
+
+    df.to_csv('database/FabryPerot/mean')
+    
+    return df
+
+
+join_days1()
