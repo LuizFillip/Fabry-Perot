@@ -51,11 +51,14 @@ def interpol_directions(
     
     out =  []
     for seq in DIRECTIONS:
-        # try:
-        ts = sep_direction_(df, seq, parameter = parameter)
+       
+        try:
+            ts = sep_direction_(df, seq, parameter = parameter)
         
-        out.append(ts.to_frame(seq))
-      
+            out.append(ts.to_frame(seq))
+        except:
+            continue 
+        
     return pd.concat(out, axis = 1)
 
 
@@ -86,17 +89,19 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
 
 
 def join_days1():
-    infile = 'database/FabryPerot/car/'
+    infile = 'database/FabryPerot/cj/'
 
     files = os.listdir(infile)
 
     out = []
 
     for file in files:
-        df1 = fp.FPI(infile + file).wind
-        # try:
-        out.append(
-            interpol_directions(df1, parameter = 'vnu'))
+       
+        if file.split('.')[1] == '7100':
+            # print(file)
+            df1 = fp.FPI(infile + file).wind
+            out.append(
+                interpol_directions(df1, parameter = 'vnu'))
         # except:
         #     continue 
         
@@ -105,9 +110,11 @@ def join_days1():
     df['doy'] = df.index.day_of_year
 
 
-    df.to_csv('database/FabryPerot/mean')
+    df.to_csv('database/FabryPerot/mean_ch')
     
     return df
 
 
 join_days1()
+
+   
