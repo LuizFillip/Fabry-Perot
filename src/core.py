@@ -201,7 +201,7 @@ def main():
 # df = FPI(infile).bright
 
 
-# infile = 'database/FabryPerot/cj/bfp200517g.7101.txt'
-# df = read_file(infile, drop = False)
+# infile = 'database/FabryPerot/cj/bfp190806g.7100.txt'
+# df = FPI(infile).wind
 
-# df.columns 
+# df 

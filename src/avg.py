@@ -53,8 +53,8 @@ def interpol_directions(
     for seq in DIRECTIONS:
        
         try:
-            ts = sep_direction_(df, seq, parameter = parameter)
-        
+            ts = sep_direction_(
+                df, seq, parameter = parameter)
             out.append(ts.to_frame(seq))
         except:
             continue 
@@ -114,7 +114,7 @@ def join_days1():
     
     return df
 
-
-join_days1()
+# 
+# join_days1()
 
    
