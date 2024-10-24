@@ -189,19 +189,4 @@ def main():
         df.loc[df['dir'] == d]['rle'].plot(label = d)
     
 
-# infile = 'database/FabryPerot/bfp220724g.7101.txt'
-
-# df = read_file(infile, drop = True)
-
-# df['VN2'].dropna().plot()
-
-
-# infile = 'database/FabryPerot/cj/bfp220724g.7100.txt'
-
-# df = FPI(infile).bright
-
-
-# infile = 'database/FabryPerot/cj/bfp190806g.7100.txt'
-# df = FPI(infile).wind
-
-# df 
+    
