@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import datetime as dt
 import base as b 
 
 def read_file(infile, drop = False):
@@ -137,21 +136,37 @@ class FPI(object):
         return vnu / (np.cos(E) * np.sin(A))
 
     @property
-    def temp(self):
+    def tn(self):
         return self.df.loc[:, ["tn", "dtn", "dir", "time"]]
 
     @property
-    def wind(self):
+    def vnu(self):
         
         return self.df.loc[:, ["vnu", "dvnu", "dir", "time"]]
     
     @property
-    def bright(self):
+    def rle(self):
         return self.df.loc[:, ["rle", "drle", "dir", "time"]]
+    
+    @property
+    def zips(self):
+     vls = ['vnu', 'tn', 'rle']
+     dfs = [self.vnu, self.tn, self.rle]
+     return zip(vls, dfs)
 
-
-
-
+def input_nans(x, y):
+   
+    x_plot = []
+    y_plot = []
+    for i in range(len(x) - 1):
+        x_plot.append(x[i])
+        y_plot.append(y[i])
+        if abs(x[i+1] - x[i]) > 2:  
+            
+            x_plot.append(np.nan)
+            y_plot.append(np.nan)
+    x_plot.append(x[-1])
+    y_plot.append(y[-1])
 
 def load_FPI(
         infile, 

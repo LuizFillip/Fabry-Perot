@@ -10,12 +10,16 @@ def dn_to_filename(dn, site = 'bfp', code = 7100):
 #     fmt = f'{site}%y%m%dg.{code}.txt'
 #     return dt.datetime.strptime(file, fmt)
 
-def file_of_the_month(dn, infile):
+def file_of_the_month(ref, infile):
     files = os.listdir(infile)
     out = []
     for file in files:
-        month =  filename_to_dn(file).month
-        if dn.month == month:
+        
+        dn = fn2dn(file)
+        month =  dn.month
+        year =  dn.year
+        if ((ref.month == month) and 
+            (ref.year == year)):
             
             out.append(file)
     

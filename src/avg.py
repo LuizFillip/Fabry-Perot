@@ -40,7 +40,8 @@ def sep_direction_(df, seq,  parameter = 'vnu'):
 def interpol_directions(
         df, 
         parameter = 'vnu',
-        wind_threshold = 400):
+        wind_threshold = 400
+        ):
     
     if parameter == 'vnu':
         
@@ -54,7 +55,10 @@ def interpol_directions(
        
         try:
             ts = sep_direction_(
-                df, seq, parameter = parameter)
+                df, 
+                seq, 
+                parameter = parameter
+                )
             out.append(ts.to_frame(seq))
         except:
             continue 
@@ -67,7 +71,7 @@ def interpol_directions(
 def join_days(ref_date, in_month = True, parameter = 'tn'):
     
     infile = 'database/FabryPerot/cj/'
-    
+    infile = 'database/FabryPerot/car/'
     if in_month:
         files = fp.file_of_the_month(ref_date, infile)
     else:
@@ -87,34 +91,62 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
     return df
 
 
+def get_mean_in_day(df, vl):
+    
+    ds = interpol_directions(
+            df, 
+            parameter = vl 
+            )
+    
+    ds[f'{vl}_zonal'] = ds[['west', 'east']].mean(axis = 1)
+    
+    ds[f'{vl}_merid'] = ds[['south', 'north']].mean(axis = 1)
+    
+    return ds[[f'{vl}_merid', f'{vl}_zonal']] 
 
-def join_days1():
-    infile = 'database/FabryPerot/cj/'
-
-    files = os.listdir(infile)
-
+def concat_parameters(fpi):
+    
+    vls = ['vnu', 'tn', 'rle']
+    dfs = [fpi.vnu, fpi.tn, fpi.rle]
+    
     out = []
+    
+    for vl, df in zip(vls, dfs):
+        
+        out.append(get_mean_in_day(df, vl))
+    
+    return pd.concat(out, axis = 1)
 
+import datetime as dt 
+
+def save_averages():
+    
+    ref_date = dt.datetime(2015,12,20)
+    
+    infile = 'database/FabryPerot/car/'
+    
+    files = fp.file_of_the_month(ref_date, infile)
+    
+    out = []
+    
     for file in files:
-       
-        if file.split('.')[1] == '7100':
-            # print(file)
-            df1 = fp.FPI(infile + file).wind
-            out.append(
-                interpol_directions(df1, parameter = 'vnu'))
-        # except:
-        #     continue 
+        dn = fp.fn2dn(file) 
+        if dn.day == 20:
+            pass
+        else:
+            try:
+                out.append(concat_parameters(fp.FPI(infile + file)))
+            except:
+                continue 
         
     df = pd.concat(out)
-
-    df['doy'] = df.index.day_of_year
-
-
-    df.to_csv('database/FabryPerot/mean_ch')
     
-    return df
+    
+    path = 'FabryPerot/data/201512'
+    df.to_csv(path)
 
-# 
-# join_days1()
+# save_averages()
 
-   
+
+    
+

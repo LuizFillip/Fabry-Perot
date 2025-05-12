@@ -19,14 +19,18 @@ def split_directions(
          
     
     if direction == "zon":
-        ds = df.loc[(df["dir"] == "east") | 
-                    (df["dir"] == "west"), 
-                    [parameter]]
+        ds = df.loc[
+            (df["dir"] == "east") | 
+            (df["dir"] == "west"), 
+            [parameter]
+            ]
         
     else:
-        ds = df.loc[(df["dir"] == "north") | 
-                    (df["dir"] == "south"), 
-                    [parameter]]
+        ds = df.loc[
+            (df["dir"] == "north") | 
+            (df["dir"] == "south"), 
+            [parameter]
+            ]
     
     return ds
  
@@ -49,10 +53,10 @@ def new_index(df, freq = "2min"):
         else:
             start = chuck
             end = chuck + delta
-
-    return pd.date_range(f"{start} 21:00", 
-                         f"{end} 07:00", 
-                         freq = freq)
+            
+    sts = f"{start} 21:00" 
+    end = f"{end} 07:00"
+    return pd.date_range(sts, end, freq = freq)
 
 
 def resample_and_interpol(df, freq = "2min"):
@@ -82,9 +86,9 @@ def process_directions(
     for direction in ["zon", "mer"]:
         
         if parameter == "vnu":
-            data = fp.FPI(path).wind
+            data = fp.FPI(path).vnu
         else:
-            data = fp.FPI(path).temp
+            data = fp.FPI(path).tn
             
         df = split_directions(
             data, 
