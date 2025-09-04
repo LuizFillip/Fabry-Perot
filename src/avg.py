@@ -2,7 +2,7 @@ import FabryPerot as fp
 import pandas as pd
 import os 
 import base as b
-
+import datetime as dt 
 
 DIRECTIONS = ['west', 'east', 'south', 'north']
 
@@ -14,10 +14,14 @@ def resample_new_index(ds, freq = '10min'):
     end = times[-1] #.replace(minute = 0, second = 0) 
     
     df1 = pd.DataFrame(
-        index = pd.date_range(start, end, freq = freq)
+        index = pd.date_range(
+            start, end, freq = freq
+            )
         )
     
-    df = pd.concat([ds, df1], axis = 1).interpolate()
+    df = pd.concat(
+        [ds, df1], axis = 1
+        ).interpolate()
         
     return df.resample(freq).asfreq()
 
@@ -35,7 +39,8 @@ def sep_direction_(df, seq,  parameter = 'vnu'):
                 
     ds = df.loc[df['dir'] == seq, cols]
     
-    return resample_new_index(ds, freq = '10min')[parameter]
+    return resample_new_index(
+        ds, freq = '10min')[parameter]
 
 def interpol_directions(
         df, 
@@ -66,9 +71,42 @@ def interpol_directions(
     return pd.concat(out, axis = 1)
 
 
+def get_time_avg(data):
+    
+    
+    out = []
+    for df in data:
+        try:
+            out.append(
+                fp.interpol_directions(
+                    df, parameter = 'vnu')
+                )
+        except:
+            continue
+        
+    df = pd.concat(out).sort_index()
+
+    df['time'] = df.index.to_series().apply(b.dn2float)
+    df['day'] = df.index.day
+    df = df.loc[~df.index.duplicated()]
+
+    out_dir = []
+    for col in ['north', 'south', 'east', 'west']:
+        
+        ds2 = pd.pivot_table(
+            df, 
+            columns = 'day', 
+            index = 'time', 
+            values = col)
+     
+        out_dir.append(ds2.mean(axis = 1).to_frame(col))
+        
+    return pd.concat(out_dir, axis = 1)
+
+
 
         
-def join_days(ref_date, in_month = True, parameter = 'tn'):
+def join_days(ref_date, in_month = True, p = 'tn'):
     
     infile = 'database/FabryPerot/cj/'
     infile = 'database/FabryPerot/car/'
@@ -81,7 +119,7 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
     out = []
     for filename in files:
         f = os.path.join(infile, filename)
-        out.append(interpol_directions(f, parameter))
+        out.append(interpol_directions(f, p))
         
     df = pd.concat(out).sort_index()
     
@@ -93,10 +131,7 @@ def join_days(ref_date, in_month = True, parameter = 'tn'):
 
 def get_mean_in_day(df, vl):
     
-    ds = interpol_directions(
-            df, 
-            parameter = vl 
-            )
+    ds = interpol_directions(df, parameter = vl)
     
     ds[f'{vl}_zonal'] = ds[['west', 'east']].mean(axis = 1)
     
@@ -117,11 +152,11 @@ def concat_parameters(fpi):
     
     return pd.concat(out, axis = 1)
 
-import datetime as dt 
+
 
 def save_averages():
     
-    ref_date = dt.datetime(2015,12,20)
+    ref_date = dt.datetime(2015, 12, 20)
     
     infile = 'database/FabryPerot/car/'
     
@@ -142,11 +177,3 @@ def save_averages():
     df = pd.concat(out)
     
     
-    path = 'FabryPerot/data/201512'
-    df.to_csv(path)
-
-# save_averages()
-
-
-    
-
