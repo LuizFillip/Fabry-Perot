@@ -25,8 +25,13 @@ def file_of_the_month(ref, infile):
     
     return out
 
+def fn(dn):
+    fmt = dn.strftime('%Y%m%d')
+    return f'minime01_car_{fmt}.cedar.003.txt'
 
-def date_to_filename(
+
+
+def fn_from_date_attrs(
         year, 
         month, 
         day, 
