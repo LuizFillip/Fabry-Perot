@@ -2,13 +2,13 @@ import datetime as dt
 import os
 import pandas as pd 
 
-def dn_to_filename(dn, site = 'bfp', code = 7100):
+def caj_dn2fn(dn, site = 'bfp', code = 7100):
     fmt = f'{site}%y%m%dg.{code}.txt'
     return dn.strftime(fmt)
 
-# def fn2dn(file, site = 'bfp', code = 7100):
-#     fmt = f'{site}%y%m%dg.{code}.txt'
-#     return dt.datetime.strptime(file, fmt)
+def caj_fn2dn(file, site = 'bfp', code = 7100):
+    fmt = f'{site}%y%m%dg.{code}.txt'
+    return dt.datetime.strptime(file, fmt)
 
 def file_of_the_month(ref, infile):
     files = os.listdir(infile)
